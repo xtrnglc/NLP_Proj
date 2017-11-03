@@ -1,0 +1,127 @@
+Team: All Carb Diet
+Members: Hannah Eyre, Skylar Shyu
+
+Team: Ambitious Aardvarks
+Members: Ben Andrews, Amit Athani
+
+Team: Atlantis
+Members: Shailaja Singh, Dhwani Vora
+
+Team: Automatic Intelligence
+Members: Alex Blackburn, Steven Sun
+
+Team: Bionic Bats
+Members: Alec Chapman, Max Taggart
+
+Team: Blue Dolphins
+Members: Xiaoni Cao, Rebeka Mukherjee 
+
+Team: Brilliant Chickens
+Members: Sanjana Aravindan, Harshini Keerthi Vasan
+
+Team: Clever Kangaroos
+Members: Faith Oladele, Jesus Zarate
+
+Team: Crazy Armadillos
+Members:Joseph Dunbar, Aaron Langford
+
+Team: Curious Zebras
+Members: Maryam Barouti, Domas Piragas 
+
+Team: Emerald Bumblebees
+Members: Prashanth Padmanaban, Rushit Sanghrajka
+
+Team: Fluffy Parrots
+Members: Aashish Ghimire, Hao Sha
+
+Team: Flying Leopards
+Members: Marek Stanislaw Baranowski, Yuan Zhuang      
+
+Team: Gigantic Geckos
+Members: Archanasri Subramanian, Bo Zhu 
+
+Team: GingerDevs
+Members: Sierra Allred, Aaron Dayley
+
+Team: Green Bobcats
+Members: Dyllon Gagnier, Robert Simmons
+
+Team: Hilarious Elephants
+Members: Kelsey Heidarian, Jackson Murphy
+
+Team: HY
+Members: Han Han, Chen Yang
+
+Team: Hypercell
+Members: Prasid Mitra, Remaldeep Singh
+
+Team: LeNguyen
+Members: Trung Le, Michelle Nguyen   
+
+Team: Low Recall
+Members: Kiran Gadhave, Shuvrajit Mukherjee 
+
+Team: Magenta Wolves
+Members: Pablo Napan-Molina, Abhishek Penujuri Nataraj
+
+Team: Magic Tiger
+Members: Matthew Canova  
+
+Team: Mission NLP
+Members: Srija Adusumilli, Teja Kommineni
+
+Team: Mysterious Coyotes
+Members: Paridhi Baheti, Archit Rathore
+
+Team: Orange Ocelots
+Members: Amir Biglari, Wei Zhao 
+
+Team: Pink Panthers
+Members: Xiaowan Li, Ren Miao
+
+Team: Purple Penguins
+Members: Daniel Mattheiss, Ryan Welling
+
+Team: root
+Members: Hong Xu, Jie Zhang
+
+Team: Rowdy Raccoons
+Members: Jacob Luke, Bernard Serbinowski
+
+Team: SG 394
+Members: Sheetal Krishna Mohanadas Janaki, Greeshma Mahadeva Prasad
+
+Team: Silly Gophers
+Members: Garima Chhabra, Vinu Sreenivasan
+
+Team: Silver Scorpions
+Members: Abhishek Lakshminarayana, Sanjeev Sandeep
+
+Team: Sneaky Sharks
+Members: Jacob Kelly, Spencer Purves
+
+Team: Sotally Tober
+Members: Pranavnath Reddy Dommata, Akshay Khatwani
+
+Team: Spotted Owls
+Members: Nipun Gottapu, Krunal Jain
+
+Team: SteelePeters
+Members: Zachary Peters, Alex Steele
+
+Team: Striped Hedgehogs
+Members: Michael Mackliet, Minh Pham 
+
+Team: Topaz Turtles
+Members: Andre LaFleur, Quinn Luck
+
+Team: Unnatural Language Processing
+Members: Snehashish Mishra, Nick Porter
+
+Team: White Buffalo
+Members: Christian Felt
+
+Team: Wise Rabbits
+Members: Ben Durrant, Brandon Koch
+
+
