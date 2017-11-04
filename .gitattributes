@@ -1,3 +1,4 @@
 *.jar filter=lfs diff=lfs merge=lfs -text
 .jar filter=lfs diff=lfs merge=lfs -text
 stanford-postagger-full-2017-06-09 filter=lfs diff=lfs merge=lfs -text
+stanford-corenlp-3.8.0-models-english.jar filter=lfs diff=lfs merge=lfs -text
