@@ -4,11 +4,14 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import edu.stanford.*;
 import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.simple.Sentence;
+import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 
 public class infoextract {
 	public static void main(String args[]) throws FileNotFoundException, IOException {
@@ -17,6 +20,7 @@ public class infoextract {
 		String id = "";
 		String text = "";
 		int i = 0;
+		HashMap<String, String> wordContext = new HashMap<String, String>();
 			
 		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
 		    String line;
@@ -30,14 +34,27 @@ public class infoextract {
 		    }
 		}
 		
+		MaxentTagger tagger = new MaxentTagger("stanford-postagger-full-2017-06-09/models/english-left3words-distsim.tagger");
+		String taggedString = tagger.tagString("Here's a tagged string.");
+		System.out.println(taggedString);
+
 		Document doc = new Document(text);
 		for(Sentence s : doc.sentences()) {
-			System.out.println(s.text());
+			//System.out.println(s.text());
 			for(int j = 0; j < s.words().size(); j++) {
-				System.out.println(s.word(j) + " " + s.posTag(j) + " " + s.nerTag(j));
+				
+				if(s.posTag(j).startsWith("NN")) {
+					wordContext.put(s.word(j), s.text());
+					System.out.println(s.word(j) + " " + s.posTag(j) + " " + s.nerTag(j));
+				}
 			}
-			System.out.println("\n\n");			
+			
+			//System.out.println("\n\n");			
 		}
+		
+//		for(Entry<String, String> s : wordContext.entrySet()) {
+//			System.out.println(s.getKey() + " : " + s.getValue());
+//		}
 		
 		System.out.println("Done");
 	}

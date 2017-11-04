@@ -17,5 +17,10 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/Users/trungle/Documents/workspace/NLP_PROJ/stanford-corenlp-3.8.0-models.jar"/>
+	<classpathentry kind="lib" path="/Users/trungle/Documents/workspace/NLP_PROJ/stanford-corenlp-3.8.0-models-english.jar"/>
+	<classpathentry kind="lib" path="/Users/trungle/Documents/workspace/NLP_PROJ/stanford-postagger-full-2017-06-09/stanford-postagger-3.8.0-javadoc.jar"/>
+	<classpathentry kind="lib" path="/Users/trungle/Documents/workspace/NLP_PROJ/stanford-postagger-full-2017-06-09/stanford-postagger-3.8.0-sources.jar"/>
+	<classpathentry kind="lib" path="/Users/trungle/Documents/workspace/NLP_PROJ/stanford-postagger-full-2017-06-09/stanford-postagger.jar"/>
+	<classpathentry kind="lib" path="/Users/trungle/Documents/workspace/NLP_PROJ/stanford-postagger-full-2017-06-09/stanford-postagger-3.8.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
