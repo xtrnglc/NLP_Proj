@@ -96,11 +96,6 @@ public class infoextract {
 		return answers;
 	}
 
-	/*
-	 * public static HashSet<String> generateAnswerHashSet(List<String> slot) {
-	 * HashSet<String> perpetrator_orgs = new HashSet<String>(); }
-	 */
-
 	public static String printTemplate(String id, String incident, HashSet<String> weapon, List<String> perpIndiv,
 			HashSet<String> perpOrg, List<String> target, List<String> victim) {
 		String template = "";
