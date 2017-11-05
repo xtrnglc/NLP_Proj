@@ -1,128 +1,207 @@
 package main;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
-
-import edu.stanford.*;
-import edu.stanford.nlp.simple.Document;
-import edu.stanford.nlp.simple.Sentence;
-import edu.stanford.nlp.tagger.maxent.MaxentTagger;
+import java.util.Scanner;
 
 public class infoextract {
-	public static void main(String args[]) throws FileNotFoundException, IOException {
-		
-		String file = args[0];
-		String id = "";
-		String text = "";
-		int i = 0;
-		HashMap<String, String> wordContext = new HashMap<String, String>();
-			
-		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-		    String line;
-		    while ((line = br.readLine()) != null) {
-		    	if(i==0) {
-		    		id = line;
-		    	} else {
-			    	text += line;
-		    	}
-		    	i++;
-		    }
-		}
-		
-		MaxentTagger tagger = new MaxentTagger("stanford-postagger-full-2017-06-09/models/english-left3words-distsim.tagger");
-		String taggedString = tagger.tagString("Here's a tagged string.");
-		System.out.println(taggedString);
 
-		Document doc = new Document(text);
-		for(Sentence s : doc.sentences()) {
-			//System.out.println(s.text());
-			for(int j = 0; j < s.words().size(); j++) {
-				
-				if(s.posTag(j).startsWith("NN")) {
-					wordContext.put(s.word(j), s.text());
-					System.out.println(s.word(j) + " " + s.posTag(j) + " " + s.nerTag(j));
+	static List<File> dev_files = new ArrayList<File>();
+	static List<String> perp_orgs = new ArrayList<String>();
+	static List<String> weapons = new ArrayList<String>();
+
+	public static void main(String args[]) throws FileNotFoundException, IOException {
+		File dev_folder = new File(args[0]);
+		File[] listOfDevFiles = dev_folder.listFiles();
+		File perp_orgs_file = new File(args[1]);
+		File weapons_file = new File(args[2]);
+
+		for (File file : listOfDevFiles) {
+			if (file.isFile()) {
+				dev_files.add(file);
+			}
+		}
+
+		Scanner scanner = new Scanner(perp_orgs_file);
+		while (scanner.hasNext()) {
+			perp_orgs.add(scanner.nextLine());
+		}
+		scanner.close();
+
+		Scanner scanner2 = new Scanner(weapons_file);
+		while (scanner2.hasNext()) {
+			weapons.add(scanner2.nextLine());
+		}
+		scanner2.close();
+
+		for (File file : dev_files) {
+			String id = "";
+			String text = "";
+			int i = 0;
+
+			try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+				String line;
+				while ((line = br.readLine()) != null) {
+					if (i == 0) {
+						id = line.split("\\s+")[0];
+					} else {
+						text += line;
+					}
+					i++;
 				}
 			}
-			
-			//System.out.println("\n\n");			
+
+			HashSet<String> perpetrator_orgs = new HashSet<String>();
+			for (int j = 0; j < perp_orgs.size(); j++) {
+				String[] orgs = perp_orgs.get(j).split("\\s+/\\s+");
+
+				if (orgs.length > 1) {
+					for (int k = 0; k < orgs.length; k++) {
+						if (text.contains(orgs[k])) {
+							perpetrator_orgs.add(orgs[k]);
+							break;
+						}
+					}
+				} else {
+					if (text.contains(orgs[0])) {
+						perpetrator_orgs.add(orgs[0]);
+					}
+				}
+			}
+
+			if (perpetrator_orgs.size() == 0) {
+				perpetrator_orgs.add("-");
+			}
+
+			HashSet<String> _weapons = new HashSet<String>();
+			for (int j = 0; j < weapons.size(); j++) {
+				String[] weapon = weapons.get(j).split("\\s+/\\s+");
+
+				if (weapon.length > 1) {
+					for (int k = 0; k < weapon.length; k++) {
+						if (text.contains(weapon[k])) {
+							_weapons.add(weapon[k]);
+							break;
+						}
+					}
+				} else {
+					if (text.contains(weapon[0])) {
+						_weapons.add(weapon[0]);
+					}
+				}
+			}
+
+			if (_weapons.size() == 0) {
+				_weapons.add("-");
+			}
+
+			if (id.startsWith("DEV") || id.startsWith("TST")) {
+				System.out.println(
+						printTemplate(id, getIncident(text), _weapons, new ArrayList<String>(Arrays.asList("-")), perpetrator_orgs,
+								new ArrayList<String>(Arrays.asList("-")), new ArrayList<String>(Arrays.asList("-"))));
+				System.out.println();
+			}
 		}
-		
-//		for(Entry<String, String> s : wordContext.entrySet()) {
-//			System.out.println(s.getKey() + " : " + s.getValue());
-//		}
-		
-		System.out.println("Done");
 	}
-	
-	public static String printTemplate(String id, String incident, String weapon, List<String> perpIndiv, List<String> perpOrg, List<String> target, List<String> victim) {
+
+	/*
+	 * public static HashSet<String> generateAnswerHashSet(List<String> slot) {
+	 * HashSet<String> perpetrator_orgs = new HashSet<String>(); }
+	 */
+
+	public static String printTemplate(String id, String incident, HashSet<String> weapon, List<String> perpIndiv,
+			HashSet<String> perpOrg, List<String> target, List<String> victim) {
 		String template = "";
 		template += "ID: " + id + "\n";
 		template += "INCIDENT: " + incident + "\n";
-		template += "WEAPON: " + weapon + "\n";
+		template += "WEAPON: ";
+		int count = 0;
+		for (String s : weapon) {
+			if (count == 0) {
+				template += s;
+				template += "\n";
+			} else {
+				template += "        " + s;
+				template += "\n";
+			}
+			count++;
+		}
 		template += "PERP INDIV: ";
-		for(String s : perpIndiv) {
+		for (String s : perpIndiv) {
 			template += " " + s;
 		}
 		template += "\n";
 		template += "PERP ORG: ";
-		for(String s : perpOrg) {
-			template += " " + s;
+		int count2 = 0;
+		for (String s : perpOrg) {
+			if (count2 == 0) {
+				template += s;
+				template += "\n";
+			} else {
+				template += "          " + s;
+				template += "\n";
+			}
+			count2++;
 		}
-		template += "\n";
 		template += "TARGET: ";
-		for(String s : target) {
-			template += " " + s;
+		for (String s : target) {
+			template += s;
+			template += "\n";
 		}
-		template += "\n";
 		template += "VICTIM: ";
-		for(String s : victim) {
+		for (String s : victim) {
 			template += " " + s;
 		}
 		template += "\n";
 		return template;
 	}
+	
+	public static String getIncident(String text) {
+		String incident = "ATTACK";
+
+		HashSet<String> arsonKeyWords = new HashSet<String>(
+				Arrays.asList("BURN", "BURNING", "INCINERATE", "COMBUST", "COMBUSTED", "ON FIRE"));
+
+		for (String s : arsonKeyWords) {
+			if (text.contains(s)) {
+				return "ARSON";
+			}
+		}
+
+		HashSet<String> kidnapKeyWords = new HashSet<String>(
+				Arrays.asList("KIDNAP", "ABDUCT", "KIDNAPPING", "KIDNAPPED", "RANSOM", "REGISTRATION", "SEIZE", "SEIZED", "SNATCH", "SNATCHED", "HOSTAGE", "ABDUCTED"));
+
+		for (String s : kidnapKeyWords) {
+			if (text.contains(s)) {
+				return "KIDNAPPING";
+			}
+		}
+
+		HashSet<String> bombingKeyWords = new HashSet<String>(Arrays.asList("BOMB", "BOMBING", "EXPLOSION", "EXPLODE",
+				"EXPLODED", "EXPLOSIVE", "BLAST", "BLASTED", "BLEW UP", "DYNAMITE"));
+
+		for (String s : bombingKeyWords) {
+			if (text.contains(s)) {
+				return "BOMBING";
+			}
+		}
+
+		HashSet<String> robberyKeyWords = new HashSet<String>(Arrays.asList("ROBBED", "ROBBERY", "STOLE", "THEFT",
+				"MUGGING", "THIEF", "HEIST", "ROB", "BURGLAR", "BURGLARY", "STEAL"));
+
+		for (String s : robberyKeyWords) {
+			if (text.contains(s)) {
+				return "ROBBERY";
+			}
+		}
+
+		return incident;
+	}
 }
-//Number
-//Tag
-//Description
-//1.	CC	Coordinating conjunction
-//2.	CD	Cardinal number
-//3.	DT	Determiner
-//4.	EX	Existential there
-//5.	FW	Foreign word
-//6.	IN	Preposition or subordinating conjunction
-//7.	JJ	Adjective
-//8.	JJR	Adjective, comparative
-//9.	JJS	Adjective, superlative
-//10.	LS	List item marker
-//11.	MD	Modal
-//12.	NN	Noun, singular or mass
-//13.	NNS	Noun, plural
-//14.	NNP	Proper noun, singular
-//15.	NNPS	Proper noun, plural
-//16.	PDT	Predeterminer
-//17.	POS	Possessive ending
-//18.	PRP	Personal pronoun
-//19.	PRP$	Possessive pronoun
-//20.	RB	Adverb
-//21.	RBR	Adverb, comparative
-//22.	RBS	Adverb, superlative
-//23.	RP	Particle
-//24.	SYM	Symbol
-//25.	TO	to
-//26.	UH	Interjection
-//27.	VB	Verb, base form
-//28.	VBD	Verb, past tense
-//29.	VBG	Verb, gerund or present participle
-//30.	VBN	Verb, past participle
-//31.	VBP	Verb, non-3rd person singular present
-//32.	VBZ	Verb, 3rd person singular present
-//33.	WDT	Wh-determiner
-//34.	WP	Wh-pronoun
-//35.	WP$	Possessive wh-pronoun
-//36.	WRB	Wh-adverb
