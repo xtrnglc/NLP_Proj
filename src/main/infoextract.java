@@ -58,57 +58,42 @@ public class infoextract {
 				}
 			}
 
-			HashSet<String> perpetrator_orgs = new HashSet<String>();
-			for (int j = 0; j < perp_orgs.size(); j++) {
-				String[] orgs = perp_orgs.get(j).split("\\s+/\\s+");
-
-				if (orgs.length > 1) {
-					for (int k = 0; k < orgs.length; k++) {
-						if (text.contains(orgs[k])) {
-							perpetrator_orgs.add(orgs[k]);
-							break;
-						}
-					}
-				} else {
-					if (text.contains(orgs[0])) {
-						perpetrator_orgs.add(orgs[0]);
-					}
-				}
-			}
-
-			if (perpetrator_orgs.size() == 0) {
-				perpetrator_orgs.add("-");
-			}
-
-			HashSet<String> _weapons = new HashSet<String>();
-			for (int j = 0; j < weapons.size(); j++) {
-				String[] weapon = weapons.get(j).split("\\s+/\\s+");
-
-				if (weapon.length > 1) {
-					for (int k = 0; k < weapon.length; k++) {
-						if (text.contains(weapon[k])) {
-							_weapons.add(weapon[k]);
-							break;
-						}
-					}
-				} else {
-					if (text.contains(weapon[0])) {
-						_weapons.add(weapon[0]);
-					}
-				}
-			}
-
-			if (_weapons.size() == 0) {
-				_weapons.add("-");
-			}
+			HashSet<String> perpetrator_orgs = getAnswers(perp_orgs, text);
+			HashSet<String> _weapons = getAnswers(weapons, text);
 
 			if (id.startsWith("DEV") || id.startsWith("TST")) {
-				System.out.println(
-						printTemplate(id, getIncident(text), _weapons, new ArrayList<String>(Arrays.asList("-")), perpetrator_orgs,
-								new ArrayList<String>(Arrays.asList("-")), new ArrayList<String>(Arrays.asList("-"))));
+				System.out.println(printTemplate(id, getIncident(text), _weapons,
+						new ArrayList<String>(Arrays.asList("-")), perpetrator_orgs,
+						new ArrayList<String>(Arrays.asList("-")), new ArrayList<String>(Arrays.asList("-"))));
 				System.out.println();
 			}
 		}
+	}
+
+	public static HashSet<String> getAnswers(List<String> inputFile, String text) {
+		HashSet<String> answers = new HashSet<String>();
+		for (int j = 0; j < inputFile.size(); j++) {
+			String[] splitAnswer = inputFile.get(j).split("\\s+/\\s+");
+
+			if (splitAnswer.length > 1) {
+				for (int k = 0; k < splitAnswer.length; k++) {
+					if (text.contains(splitAnswer[k])) {
+						answers.add(splitAnswer[k]);
+						break;
+					}
+				}
+			} else {
+				if (text.contains(splitAnswer[0])) {
+					answers.add(splitAnswer[0]);
+				}
+			}
+		}
+
+		if (answers.size() == 0) {
+			answers.add("-");
+		}
+
+		return answers;
 	}
 
 	/*
@@ -162,7 +147,7 @@ public class infoextract {
 		template += "\n";
 		return template;
 	}
-	
+
 	public static String getIncident(String text) {
 		String incident = "ATTACK";
 
@@ -175,8 +160,8 @@ public class infoextract {
 			}
 		}
 
-		HashSet<String> kidnapKeyWords = new HashSet<String>(
-				Arrays.asList("KIDNAP", "ABDUCT", "KIDNAPPING", "KIDNAPPED", "RANSOM", "REGISTRATION", "SEIZE", "SEIZED", "SNATCH", "SNATCHED", "HOSTAGE", "ABDUCTED"));
+		HashSet<String> kidnapKeyWords = new HashSet<String>(Arrays.asList("KIDNAP", "ABDUCT", "KIDNAPPING",
+				"KIDNAPPED", "RANSOM", "REGISTRATION", "SEIZE", "SEIZED", "SNATCH", "SNATCHED", "HOSTAGE", "ABDUCTED"));
 
 		for (String s : kidnapKeyWords) {
 			if (text.contains(s)) {
