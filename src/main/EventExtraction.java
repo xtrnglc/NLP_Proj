@@ -10,6 +10,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+/** 
+ * @author Michelle Nguyen
+ */
 public class EventExtraction {
 
 	static List<File> dev_files = new ArrayList<File>();
