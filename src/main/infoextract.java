@@ -4,11 +4,15 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 
 import edu.stanford.*;
+import edu.stanford.nlp.parser.nndep.DependencyParser;
+import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.simple.Sentence;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
@@ -16,47 +20,85 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 public class infoextract {
 	public static void main(String args[]) throws FileNotFoundException, IOException {
 		
-		String file = args[0];
+		//String file = args[0];
+		String file = "developset/texts/DEV-MUC3-0803";
 		String id = "";
 		String text = "";
 		int i = 0;
 		HashMap<String, String> wordContext = new HashMap<String, String>();
 			
-		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-		    String line;
-		    while ((line = br.readLine()) != null) {
-		    	if(i==0) {
-		    		id = line;
-		    	} else {
-			    	text += line;
-		    	}
-		    	i++;
-		    }
-		}
-		
-		MaxentTagger tagger = new MaxentTagger("stanford-postagger-full-2017-06-09/models/english-left3words-distsim.tagger");
-		String taggedString = tagger.tagString("Here's a tagged string.");
-		System.out.println(taggedString);
-
-		Document doc = new Document(text);
-		for(Sentence s : doc.sentences()) {
-			//System.out.println(s.text());
-			for(int j = 0; j < s.words().size(); j++) {
-				
-				if(s.posTag(j).startsWith("NN")) {
-					wordContext.put(s.word(j), s.text());
-					System.out.println(s.word(j) + " " + s.posTag(j) + " " + s.nerTag(j));
-				}
-			}
-			
-			//System.out.println("\n\n");			
-		}
-		
-//		for(Entry<String, String> s : wordContext.entrySet()) {
-//			System.out.println(s.getKey() + " : " + s.getValue());
+//		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+//		    String line;
+//		    while ((line = br.readLine()) != null) {
+//		    	if(i==0) {
+//		    		id = line;
+//		    	} else {
+//			    	text += line;
+//		    	}
+//		    	i++;
+//		    }
 //		}
 		
+		String s2 = "John Smith used a gun to kill David Tan";
+		MaxentTagger tagger = new MaxentTagger("stanford-postagger-full-2017-06-09/models/english-left3words-distsim.tagger");
+		String taggedString = tagger.tagString(s2);
+		Sentence s1 = new Sentence(s2);
+		SemanticGraph sg = s1.dependencyGraph();
+		System.out.println(sg.toList());
+		
+		String s3 = "John placed a car bomb in front of the embassy";
+		taggedString = tagger.tagString(s3);
+		s1 = new Sentence(s3);
+		sg = s1.dependencyGraph();
+		System.out.println(sg.toList());
+		
 		System.out.println("Done");
+	}
+	
+	public static void parseTemplate(String text, String id) {
+		System.out.println(id + " " + getIncident(text));
+	}
+	
+	public static String getIncident(String text) {
+		String incident = "ATTACK";
+		
+		HashSet<String> arsonKeyWords = 
+				new HashSet<String>(Arrays.asList("BURN", "BURNING", "INCINERATE", "COMBUST", "COMBUSTED", "ON FIRE"));
+
+		for(String s : arsonKeyWords) {
+			if(text.contains(s)) {
+				return "ARSON";
+			}
+		}
+		
+		HashSet<String> kidnapKeyWords = 
+				new HashSet<String>(Arrays.asList("KIDNAP", "ABDUCT", "RELEASE", "KIDNAPPING", "KIDNAPPED", "RANSOM", "REGISTRATION", "CAPTURE", "SEIZE", "SEIZED", "SNATCH", "SNATCHED", "HOSTAGE", "ABDUCTED"));
+
+		for(String s : kidnapKeyWords) {
+			if(text.contains(s)) {
+				return "KIDNAP";
+			}
+		}
+
+		HashSet<String> bombingKeyWords = 
+				new HashSet<String>(Arrays.asList("BOMB", "BOMBING", "EXPLOSION", "EXPLODE", "EXPLODED", "EXPLOSIVE", "BLAST", "BLASTED", "BLEW UP"));
+
+		for(String s : bombingKeyWords) {
+			if(text.contains(s)) {
+				return "BOMBING";
+			}
+		}
+		
+		HashSet<String> robberyKeyWords = 
+				new HashSet<String>(Arrays.asList("ROBBED", "ROBBERY", "STOLE", "THEFT", "MUGGING", "THIEF", "HEIST", "ROB", "BURGLAR", "BURGLARY", "STEAL"));
+
+		for(String s : robberyKeyWords) {
+			if(text.contains(s)) {
+				return "ROBBERY";
+			}
+		}
+		
+		return incident;
 	}
 	
 	public static String printTemplate(String id, String incident, String weapon, List<String> perpIndiv, List<String> perpOrg, List<String> target, List<String> victim) {
@@ -87,6 +129,7 @@ public class infoextract {
 		return template;
 	}
 }
+
 //Number
 //Tag
 //Description
