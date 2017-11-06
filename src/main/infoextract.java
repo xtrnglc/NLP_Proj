@@ -92,6 +92,7 @@ public class infoextract {
 		weaponGeneralRules.put("DAMAGED BY", "DAMAGED BY <WEAPON>");
 		//weaponGeneralRules.put("WENT OFF", "<WEAPON> WENT OFF");
 		weaponGeneralRules.put("MADE UP OF", "MADE UP OF <WEAPON>");
+		weaponGeneralRules.put("CAUSED BY", "CAUSED BY <WEAPON>");
 	}
 	
 	public static void metric() {
@@ -159,11 +160,6 @@ public class infoextract {
 		System.out.println(np);
 	}
 	
-	//works for rules of length 2
-	public static void getWeapon(String text) {
-		
-	}
-	
 	public static String parseWeaponRule(String rule, String s) {
 		//String rule = "DESTROYED BY <WEAPON>";
 		s = s.replaceAll("\\s*\\p{Punct}+\\s*$", "");
@@ -177,21 +173,13 @@ public class infoextract {
 		String[] rules = rule.split("\\s+");
 		//String s = "BOGOTA WAS DESTROYED BY A BOMB, POLICE REPORTED.";
 		String[] split = s.split("\\s+");
-		String weapon = "";
-		
-		//Do specific rules
-		if(s.contains("RECEIVED") && s.contains("WOUNDS")) {
-			weapon = "BULLETS";
-		}
-		if(s.contains("PLACED") && s.contains("UNDER")) {
-			weapon = "DYNAMITES";
-		}
+		String weapon = null;		
 		
 		boolean after = true;
 		
 		Sentence sentence = new Sentence(s).caseless();
 		List<String> posSplit = sentence.caseless().posTags();
-		System.out.println(sentence.caseless().parse());
+		//System.out.println(sentence.caseless().parse());
 		int index = 0;
 		int indexOfTriggerWord = 0;
 		int indexOfWeapon = 0;
@@ -222,12 +210,16 @@ public class infoextract {
 			for(int i = index+1; i < split.length; i++) {
 				if(rules[indexOfTriggerWord].equals("BLASTS") || rules[indexOfTriggerWord].equals("BLAST")) {
 					if(posSplit.get(i).contains("NN") || posSplit.get(i).equals("JJ")) {
-						weapon = split[i];
+						if(weapons.contains(split[i])) {
+							weapon = split[i];
+						}
 						break;
 					}
 				} else {
 					if(posSplit.get(i).contains("NN")) {
-						weapon = split[i];
+						if(weapons.contains(split[i])) {
+							weapon = split[i];
+						}
 						break;
 					}
 				}
@@ -237,17 +229,23 @@ public class infoextract {
 			for(int i = index-1; i > -1; i--) {
 				if(rules[indexOfTriggerWord].equals("BLASTS") || rules[indexOfTriggerWord].equals("BLAST")) {
 					if(posSplit.get(i).contains("NN") || posSplit.get(i).contains("JJ")) {
-						weapon = split[i];
+						if(weapons.contains(split[i])) {
+							weapon = split[i];
+						}
 						break;
 					}
 				} else{
 					if(posSplit.get(i).contains("NN")) {
-						weapon = split[i];
+						if(weapons.contains(split[i])) {
+							weapon = split[i];
+						}
 						break;
 					}
 				}
 			}
 		}
+		
+		
 		
 		return weapon;
 	}
@@ -280,34 +278,45 @@ public class infoextract {
 				
 			oursPerpOrg.put(id, po);
 			HashSet<String> perpetrator_orgs = getAnswers(perp_orgs, text);
-			HashSet<String> _weapons = getAnswers(weapons, text);
 			
 			HashSet<String> weaponsSet = new HashSet<String>();
+						
+			if(id.equals("DEV-MUC3-0873")) {
+				System.out.println();
+			}
 			
-//			for(String s : weaponGeneralRules.keySet()) {
-//				if(text.contains(s)) {
-//					parseWeaponRule(weaponGeneralRules.get(s), )
-//				}
-//			}
+			if(text.contains("RECEIVED") && text.contains("WOUNDS")) {
+				weaponsSet.add("BULLETS");
+			}
+			if(text.contains("PLACED") && text.contains("UNDER")) {
+				weaponsSet.add("DYNAMITES");
+			}
 			
 			Document d = new Document(text);
-			String weapons = "";
 			
 			for(Sentence s : d.sentences()) {
 				//System.out.println(s.text());
 				for(String s1 : weaponGeneralRules.keySet()) {
 					//System.out.println(s1);
 					if(s.text().matches(".*\\b" + s1 + "\\b.*")) {
-						weapons += parseWeaponRule(weaponGeneralRules.get(s1), s.text()) + " ";
+						String w = parseWeaponRule(weaponGeneralRules.get(s1), s.text());
+						if(w != null) {
+							weaponsSet.add(w);
+						}
 					}
 				}
 			}
-			System.out.println(id + " " + weapons);
+//			System.out.print(id + " ");
+//			for(String s : weaponsSet) {
+//				System.out.print(s + " ");
+//			}
+//			System.out.println();
+			
 			if (id.startsWith("DEV") || id.startsWith("TST")) {
-//				System.out.println(printTemplate(id, getIncident(text), _weapons,
-//						new ArrayList<String>(Arrays.asList("-")), perpetrator_orgs,
-//						new ArrayList<String>(Arrays.asList("-")), new ArrayList<String>(Arrays.asList("-"))));
-//				System.out.println();
+				System.out.println(printTemplate(id, getIncident(text), weaponsSet,
+						new ArrayList<String>(Arrays.asList("-")), perpetrator_orgs,
+						new ArrayList<String>(Arrays.asList("-")), new ArrayList<String>(Arrays.asList("-"))));
+				System.out.println();
 			}
 		}
 	}
@@ -340,11 +349,18 @@ public class infoextract {
 
 	public static String printTemplate(String id, String incident, HashSet<String> weapon, List<String> perpIndiv,
 			HashSet<String> perpOrg, List<String> target, List<String> victim) {
+		if(id.equals("DEV-MUC3-0012")) {
+			System.out.println();
+		}
 		String template = "";
 		template += "ID: " + id + "\n";
 		template += "INCIDENT: " + incident + "\n";
 		template += "WEAPON: ";
 		int count = 0;
+		if(weapon.size() == 0) {
+			template += "-";
+			template += "\n";
+		}
 		for (String s : weapon) {
 			if (count == 0) {
 				template += s;
@@ -353,6 +369,7 @@ public class infoextract {
 				template += "        " + s;
 				template += "\n";
 			}
+			
 			count++;
 		}
 		template += "PERP INDIV: ";
