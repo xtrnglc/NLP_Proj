@@ -93,6 +93,8 @@ public class infoextract {
 		//weaponGeneralRules.put("WENT OFF", "<WEAPON> WENT OFF");
 		weaponGeneralRules.put("MADE UP OF", "MADE UP OF <WEAPON>");
 		weaponGeneralRules.put("CAUSED BY", "CAUSED BY <WEAPON>");
+		weaponGeneralRules.put("USED", "USED <WEAPON>");
+		
 	}
 	
 	public static void metric() {
@@ -250,6 +252,18 @@ public class infoextract {
 		return weapon;
 	}
 	
+	public static HashSet<String> parseWeaponsSpecificRules(String text) {
+		HashSet<String> weaponsSet = new HashSet<String>();
+		if(text.contains("RECEIVED") && text.contains("WOUNDS")) {
+			weaponsSet.add("BULLETS");
+		}
+		if(text.contains("PLACED") && text.contains("UNDER")) {
+			weaponsSet.add("DYNAMITES");
+		}
+		
+		return weaponsSet;
+	}
+	
 	public static void generateTemplate() throws FileNotFoundException, IOException {
 		for (File file : dev_files) {
 			String id = "";
@@ -279,19 +293,8 @@ public class infoextract {
 			oursPerpOrg.put(id, po);
 			HashSet<String> perpetrator_orgs = getAnswers(perp_orgs, text);
 			
-			HashSet<String> weaponsSet = new HashSet<String>();
-						
-			if(id.equals("DEV-MUC3-0873")) {
-				System.out.println();
-			}
-			
-			if(text.contains("RECEIVED") && text.contains("WOUNDS")) {
-				weaponsSet.add("BULLETS");
-			}
-			if(text.contains("PLACED") && text.contains("UNDER")) {
-				weaponsSet.add("DYNAMITES");
-			}
-			
+			HashSet<String> weaponsSet = parseWeaponsSpecificRules(text);
+		
 			Document d = new Document(text);
 			
 			for(Sentence s : d.sentences()) {
