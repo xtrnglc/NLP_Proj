@@ -90,11 +90,20 @@ public class infoextract {
 		weaponGeneralRules.put("EXPLODED", "<WEAPON> EXPLODED");
 		weaponGeneralRules.put("DESTROYED BY", "DESTROYED BY <WEAPON>");
 		weaponGeneralRules.put("DAMAGED BY", "DAMAGED BY <WEAPON>");
-		//weaponGeneralRules.put("WENT OFF", "<WEAPON> WENT OFF");
+		weaponGeneralRules.put("WENT OFF", "<WEAPON> WENT OFF");
 		weaponGeneralRules.put("MADE UP OF", "MADE UP OF <WEAPON>");
 		weaponGeneralRules.put("CAUSED BY", "CAUSED BY <WEAPON>");
 		weaponGeneralRules.put("USED", "USED <WEAPON>");
-		
+		weaponGeneralRules.put("THREW", "THREW <WEAPON>");
+		weaponGeneralRules.put("SET OFF", "SET OFF <WEAPON>");
+		weaponGeneralRules.put("ATTACKS", "<WEAPON> ATTACKS");
+		weaponGeneralRules.put("WAS THROWN", "<WEAPON> WAS THROWN");
+		weaponGeneralRules.put("SPRAYED WITH", "SPRAYED WITH <WEAPON>");
+		weaponGeneralRules.put("FIRING", "FIRING <WEAPON>");
+		weaponGeneralRules.put("ATTACK", "<WEAPON> ATTACK");
+		weaponGeneralRules.put("WITH", "WITH <WEAPON>");
+		weaponGeneralRules.put("PLACED", "PLACED <WEAPON>");
+		weaponGeneralRules.put("USING", "USING <WEAPON>");
 	}
 	
 	public static void metric() {
@@ -111,7 +120,6 @@ public class infoextract {
 	public static void getAnswerIncidents() throws FileNotFoundException, IOException {
 		for (File file : answer_files) {
 			String id = "";
-			String text = "";
 			String incident = "";
 
 			try (BufferedReader br = new BufferedReader(new FileReader(file))) {
@@ -150,16 +158,6 @@ public class infoextract {
 				}
 			}	
 		}
-	}
- 	
-	public static void parseNP(Tree nptree) {
-		String np = "";
-		for(Tree t : nptree.getChildrenAsList()) {
-			String s = t.getLeaves().toString();
-			s = s.substring(1, s.length()-1);
-			np += s + " ";
-		}
-		System.out.println(np);
 	}
 	
 	public static String parseWeaponRule(String rule, String s) {
@@ -254,6 +252,7 @@ public class infoextract {
 	
 	public static HashSet<String> parseWeaponsSpecificRules(String text) {
 		HashSet<String> weaponsSet = new HashSet<String>();
+		
 		if(text.contains("RECEIVED") && text.contains("WOUNDS")) {
 			weaponsSet.add("BULLETS");
 		}
