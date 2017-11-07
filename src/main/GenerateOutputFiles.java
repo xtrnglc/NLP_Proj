@@ -21,9 +21,9 @@ public class GenerateOutputFiles {
 	public static void main(String args[]) throws FileNotFoundException, IOException {
 
 		File answer_folder = new File(args[0]);
-		File[] listOfAnswerFolders = answer_folder.listFiles();
+		File[] listOfAnswerFiles = answer_folder.listFiles();
 
-		for (File file : listOfAnswerFolders) {
+		for (File file : listOfAnswerFiles) {
 			if (file.isFile()) {
 				answer_files.add(file);
 			}
