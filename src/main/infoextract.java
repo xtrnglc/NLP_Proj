@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
 
-import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.simple.Sentence;
 import edu.stanford.nlp.trees.Tree;
@@ -32,16 +31,21 @@ public class infoextract {
 
 	public static HashMap<String, String> weaponGeneralRules = new HashMap<String, String>();
 	public static HashMap<String, String> perpOrgRules = new HashMap<String, String>();
+	public static HashMap<String, String> victimRules = new HashMap<String, String>();
+	
+	public static String body = "";
+	public static String fileName = "";
 
 	public static void main(String args[]) throws FileNotFoundException, IOException {
-		File dev_folder = new File(args[0]);
-		File[] listOfDevFiles = dev_folder.listFiles();
-		File answer_folder = new File(args[3]);
-		File[] listOfAnswerFiles = answer_folder.listFiles();
+		//File dev_folder = new File(args[0]);
+		//File[] listOfDevFiles = dev_folder.listFiles();
+		//File answer_folder = new File(args[3]);
+		//File[] listOfAnswerFiles = answer_folder.listFiles();
+		File inputFile = new File(args[0]);
 		File perp_orgs_file = new File(args[1]);
 		File weapons_file = new File(args[2]);
 
-		for (File file : listOfDevFiles) {
+		/*for (File file : listOfDevFiles) {
 			if (file.isFile()) {
 				dev_files.add(file);
 			}
@@ -50,7 +54,9 @@ public class infoextract {
 			if (file.isFile()) {
 				answer_files.add(file);
 			}
-		}
+		}*/
+		
+		//parseInputFile(inputFile);
 
 		Scanner scanner = new Scanner(perp_orgs_file);
 		while (scanner.hasNext()) {
@@ -65,15 +71,16 @@ public class infoextract {
 		scanner2.close();
 
 		instantiateRules();
-		 generateTemplate();
+		generateTemplate();
 		// getAnswerIncidents();
 		// getAnswerPerpOrg();
 		// metric();
 		// parseWeaponRule("<WEAPON> BLASTS", "AND THERE WERE \"EXPLOSIONS,
 		// MACHINE-GUN BLASTS, AND SHOTS,\" SANDOVAL SAID.");
-
-		//parsePerpOrgRule("", "");
+		//String w = parsePerpOrgRule("BLAMED <PERPORG>","ALTHOUGH NO ONE HAS CLAIMED CREDIT FOR THE BOMBING , PRESS SECTORS BLAMED IT ON THE DRUG MAFIA AGAINST WHOM THE GOVERNMENT HAS DECLAREDWAR .");
 	}
+	
+	
 
 	public static void instantiateRules() {
 		weaponGeneralRules.put("BLASTS", "<WEAPON> BLASTS");
@@ -108,7 +115,25 @@ public class infoextract {
 		perpOrgRules.put("BY", "BY <PERPORG>");
 		perpOrgRules.put("CLAIMED", "<PERPORG> CLAIMED");
 		perpOrgRules.put("STAGED", "<PERPORG> STAGED");
-		perpOrgRules.put("BLAMED", "<PERPORG> BLAMED");
+		perpOrgRules.put("BLAMED", "BLAMED <PERPORG>");
+		perpOrgRules.put("KIDNAPPED", "<PERPORG> KIDNAPPED");
+		
+		victimRules.put("MURDER OF", "MURDER OF <VICTIM>");
+		victimRules.put("ASSASSINATION OF", "ASSASSINATION OF <VICTIM>");
+		victimRules.put("WERE KIDNAPPED", "<VICTIM> WERE KIDNAPPED");
+		victimRules.put("WAS KILLED", "<VICTIM> WAS KILLED");
+		victimRules.put("WERE KILLED", "<VICTIM> WERE KILLED");
+		victimRules.put("DIED", "<VICTIM> DIED");
+		victimRules.put("MURDER OF", "MURDER OF <VICTIM>");
+	}
+	
+	public static void analyzeSentence(String s) {
+		Sentence sent = new Sentence(s);
+		System.out.println(s);
+		System.out.println(sent.parse());
+		for(int i = 0; i < sent.words().size(); i++) {
+			System.out.println(sent.word(i) + " " + sent.posTag(i) + " " + sent.nerTag(i));
+		}
 	}
 
 	public static void metric() {
@@ -247,6 +272,7 @@ public class infoextract {
 
 				Sentence subSentence = new Sentence(subStr);
 				boolean found = false;
+				//System.out.println(subSentence.parse());
 				String perpOrg = "";
 				for (Tree subtree : subSentence.caseless().parse()) {
 					if (subtree.label().value().equals("NP") && !found) {
@@ -259,6 +285,9 @@ public class infoextract {
 						perpOrg = removeStopWords(perpOrg);
 						if(perp_orgs.contains(perpOrg)) {
 							return perpOrg;
+						} else {
+							found = false;
+							perpOrg = "";
 						}
 					}
 				}
@@ -312,7 +341,7 @@ public class infoextract {
 			return perpOrgReturn;
 		}
 		catch(Exception e) {
-			System.out.println(e.getMessage());
+			//System.out.println(e.getMessage());
 			return null;
 		}
 	}
@@ -320,8 +349,10 @@ public class infoextract {
 	public static String removeStopWords(String s) {
 		String[] split = s.split("\\s+");
 		String newString = "";
+		int index = -1;
+		String org = "";
 		
-		ArrayList<String> stopWords = new ArrayList<String>(Arrays.asList("THE", "A"));
+		ArrayList<String> stopWords = new ArrayList<String>(Arrays.asList("THE", "A", "SO-CALLED"));
 
 		for(String s1 : split) {
 			if(!stopWords.contains(s1)) {
