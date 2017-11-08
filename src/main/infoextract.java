@@ -64,14 +64,6 @@ public class infoextract {
 		}
 		scanner2.close();
 
-		// String s = "PROMISED TO CARRY OUT A PROMPT AND SERIOUS INVESTIGATION
-		// AND TO PUNISH THOSE RESPONSIBLE FOR THE MURDER OF SIX JESUITS AND TWO
-		// WOMEN ON 16 NOVEMBER.";
-		// Sentence sentence = new Sentence(s);
-		// System.out.println(sentence.parse());
-		// Tree t = sentence.parse();
-		// System.out.println(t.getChild(0).getChild(0));
-		// parseNP(t.getChild(0).getChild(0));
 		instantiateRules();
 		 generateTemplate();
 		// getAnswerIncidents();
@@ -176,7 +168,7 @@ public class infoextract {
 
 	public static String parsePerpOrgRule(String rule, String s) {
 		try{
-			//s = "FORTUNATELY , THERE WERE NO CASUALTIES REPORTED AS A RESULT OF THISINCIDENT , FOR WHICH THE FMLN GUERRILLAS ARE BEING HELD RESPONSIBLE";
+			//s = "FOR WHICH THE FMLN GUERRILLAS CLAIMED RESPONSIBILITY";
 			s = s.replaceAll("\\s*\\p{Punct}+\\s*$", "");
 			s = s.replaceAll("\"", "");
 			s = s.replaceAll(",", "");
@@ -185,7 +177,7 @@ public class infoextract {
 			s = s.replaceAll("\\{", "").replaceAll("\\}", "");
 			s = s.replaceAll("\\$", "").replaceAll("\\$", "");
 			s = s.replaceAll("--", "");
-			//rule = "<PERPORG> RESPONSIBLE";
+			//rule = "<PERPORG> CLAIMED RESPONSIBILITY";
 			String[] split = s.split("\\s+");
 			String[] rules = rule.split("\\s+");
 			
@@ -228,13 +220,13 @@ public class infoextract {
 					break;
 				}
 			}
-
+			sent.nerTag(0).equals("ORGANIZATION");
 			if (after) {
 				// Deal with NER ORGANIZATION TAG
 				int orgIndex = -1;
 				for (int i = index + 1; i < split.length; i++) {
 					if (sent.nerTag(i).equals("ORGANIZATION")) {
-						if(perp_orgs.contains(split[orgIndex])){
+						if(perp_orgs.contains(split[i])){
 							orgIndex = i;
 						}
 						break;
@@ -243,6 +235,7 @@ public class infoextract {
 				if (orgIndex > -1) {
 					//System.out.println(split[orgIndex]);
 					if(perp_orgs.contains(split[orgIndex])) {
+						
 						perpOrgReturn = split[orgIndex];
 						return perpOrgReturn;
 					}
@@ -275,10 +268,14 @@ public class infoextract {
 			} else {
 				// Deal with NER ORGANIZATION TAG
 				int orgIndex = -1;
+				String subStr = "";
+				for (int i = 0; i < index; i++) {
+					subStr += split[i] + " ";
+				}
 				for (int i = index - 1; i > -1; i--) {
-					System.out.println(sent.nerTags());
+					//System.out.println(sent.nerTags());
 					if (sent.nerTag(i).equals("ORGANIZATION")) {
-						if(perp_orgs.contains(split[orgIndex])){
+						if(perp_orgs.contains(split[i])){
 							orgIndex = i;
 						}
 						break;
@@ -292,10 +289,7 @@ public class infoextract {
 					}
 				}
 				
-				String subStr = "";
-				for (int i = 0; i < index; i++) {
-					subStr += split[i] + " ";
-				}
+				
 
 				Sentence subSentence = new Sentence(subStr);
 				//System.out.println(subSentence.caseless().parse());
@@ -318,6 +312,7 @@ public class infoextract {
 			return perpOrgReturn;
 		}
 		catch(Exception e) {
+			System.out.println(e.getMessage());
 			return null;
 		}
 	}
@@ -338,7 +333,8 @@ public class infoextract {
 	}
 
 	public static String parseWeaponRule(String rule, String s) {
-		// String rule = "DESTROYED BY <WEAPON>";
+		//rule = "DESTROYED BY <WEAPON>";
+		//s = "BOGOTA WAS DESTROYED BY A BOMB, POLICE REPORTED.";
 		s = s.replaceAll("\\s*\\p{Punct}+\\s*$", "");
 		s = s.replaceAll("\"", "");
 		s = s.replaceAll(",", "");
@@ -348,7 +344,6 @@ public class infoextract {
 		s = s.replaceAll("\\$", "").replaceAll("\\$", "");
 		s = s.replaceAll("--", "");
 		String[] rules = rule.split("\\s+");
-		// String s = "BOGOTA WAS DESTROYED BY A BOMB, POLICE REPORTED.";
 		String[] split = s.split("\\s+");
 		String weapon = null;
 
@@ -457,11 +452,6 @@ public class infoextract {
 			}
 			
 			oursIncident.put(id, getIncident(text));
-
-//			String po = "";
-//			for (String s : getAnswers(perp_orgs, text)) {
-//				po += s + "\n";
-//			}
 
 			//oursPerpOrg.put(id, po);
 			//HashSet<String> perpetrator_orgs = getAnswers(perp_orgs, text);
