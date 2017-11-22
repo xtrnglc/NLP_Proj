@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 
 import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.simple.Sentence;
@@ -35,50 +37,120 @@ public class infoextract {
 	
 	public static String body = "";
 	public static String fileName = "";
+	
 
 	public static void main(String args[]) throws FileNotFoundException, IOException {
-		//File dev_folder = new File(args[0]);
-		//File[] listOfDevFiles = dev_folder.listFiles();
-		//File answer_folder = new File(args[3]);
-		//File[] listOfAnswerFiles = answer_folder.listFiles();
-		File inputFile = new File(args[0]);
-		File perp_orgs_file = new File(args[1]);
-		File weapons_file = new File(args[2]);
+        //File dev_folder = new File(args[0]);
+        File inputFile = new File(args[0]);
+        //File[] listOfDevFiles = dev_folder.listFiles();
+        //File answer_folder = new File(args[1]);
+        //File[] listOfAnswerFiles = answer_folder.listFiles();
+        File perp_orgs_file = new File("perp-orgs.txt");
+        File weapons_file = new File("weapons.txt");
 
-		/*for (File file : listOfDevFiles) {
-			if (file.isFile()) {
-				dev_files.add(file);
-			}
-		}
-		for (File file : listOfAnswerFiles) {
-			if (file.isFile()) {
-				answer_files.add(file);
-			}
-		}*/
-		
-		//parseInputFile(inputFile);
+        /*for (File file : listOfDevFiles) {
+        	if (file.isFile()) {
+        		dev_files.add(file);
+        	}
+        }*/
 
-		Scanner scanner = new Scanner(perp_orgs_file);
-		while (scanner.hasNext()) {
-			perp_orgs.add(scanner.nextLine());
-		}
-		scanner.close();
+        parseInputFile(inputFile);
 
-		Scanner scanner2 = new Scanner(weapons_file);
-		while (scanner2.hasNext()) {
-			weapons.add(scanner2.nextLine());
-		}
-		scanner2.close();
+        /*for (File file : listOfAnswerFiles) {
+        	if (file.isFile()) {
+        		answer_files.add(file);
+        	}
+        }*/
 
-		instantiateRules();
-		generateTemplate();
-		// getAnswerIncidents();
-		// getAnswerPerpOrg();
-		// metric();
-		// parseWeaponRule("<WEAPON> BLASTS", "AND THERE WERE \"EXPLOSIONS,
-		// MACHINE-GUN BLASTS, AND SHOTS,\" SANDOVAL SAID.");
-		//String w = parsePerpOrgRule("BLAMED <PERPORG>","ALTHOUGH NO ONE HAS CLAIMED CREDIT FOR THE BOMBING , PRESS SECTORS BLAMED IT ON THE DRUG MAFIA AGAINST WHOM THE GOVERNMENT HAS DECLAREDWAR .");
-	}
+        Scanner scanner = new Scanner(perp_orgs_file);
+        while (scanner.hasNext()) {
+            perp_orgs.add(scanner.nextLine());
+        }
+        scanner.close();
+
+        Scanner scanner2 = new Scanner(weapons_file);
+        while (scanner2.hasNext()) {
+            weapons.add(scanner2.nextLine());
+        }
+        scanner2.close();
+
+        instantiateRules();
+        generateTemplate();
+
+        // PrintWriter printWriter = new PrintWriter(inputFile.getName() + ".template", "UTF-8");
+        // printWriter.write(template);
+        // printWriter.close();
+
+        // getAnswerIncidents();
+        // getAnswerPerpOrg();
+        // metric();
+        // parseWeaponRule("<WEAPON> BLASTS", "AND THERE WERE \"EXPLOSIONS,
+        // MACHINE-GUN BLASTS, AND SHOTS,\" SANDOVAL SAID.");
+
+        //parsePerpOrgRule("", "");
+
+        generateOutputFile();
+    }
+
+    public static void parseInputFile(File file) throws FileNotFoundException, UnsupportedEncodingException {
+        Scanner scanner = null;
+        Scanner scanner2 = null;
+
+        try {
+            scanner = new Scanner(file);
+            fileName = file.getName();
+            scanner2 = new Scanner(file);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String line = "";
+        String line2 = "";
+        String body = "";
+        String id = "";
+        scanner2.nextLine();
+        int count = 0;
+
+        while (scanner.hasNext()) {
+            line = scanner.nextLine();
+            line2 = scanner2.nextLine();
+
+            if (count == 0) {
+                body += line + "\n";
+            } else {
+                body += line2 + "\n";
+            }
+
+            if (line.isEmpty() && line2.isEmpty()) {
+                count++;
+                Scanner scanner3 = new Scanner(body);
+                id = scanner3.nextLine().split("\\s+")[0];
+                PrintWriter pw = new PrintWriter(id, "UTF-8");
+                pw.write(body);
+                pw.close();
+                File outputFile = new File(id);
+                dev_files.add(outputFile);
+                scanner3.close();
+                body = "";
+            }
+        }
+
+        Scanner scanner3 = new Scanner(body);
+        id = scanner3.nextLine().split("\\s+")[0];
+        PrintWriter pw = new PrintWriter(id, "UTF-8");
+        pw.write(body);
+        pw.close();
+        File outputFile = new File(id);
+        dev_files.add(outputFile);
+        scanner3.close();
+        scanner.close();
+    }
+
+    public static void generateOutputFile() throws FileNotFoundException, UnsupportedEncodingException {
+        PrintWriter printWriter = new PrintWriter(fileName + ".templates", "UTF-8");
+        printWriter.write(body);
+        printWriter.close();
+    }
 	
 	
 
@@ -481,15 +553,18 @@ public class infoextract {
 					i++;
 				}
 			}
-			
-			oursIncident.put(id, getIncident(text));
+			if(id.equals("DEV-MUC3-0126")) {
+				System.out.print("");
+			}
+			String incident = getIncident(text);
+			oursIncident.put(id, incident);
 
 			//oursPerpOrg.put(id, po);
 			//HashSet<String> perpetrator_orgs = getAnswers(perp_orgs, text);
 			
-			if(id.equals("DEV-MUC3-0023")) {
-				System.out.print("");
-			}
+			//DEV-MUC3-0126, DEV-MUC3-0231, DEV-MUC3-0253, DEV-MUC3-0277, DEV-MUC3-0316
+			
+
 			
 			HashSet<String> weaponsSet = parseWeaponsSpecificRules(text);
 			HashSet<String> perpOrgs = new HashSet<String>();
@@ -525,7 +600,7 @@ public class infoextract {
 //			 System.out.println();
 
 			if (id.startsWith("DEV") || id.startsWith("TST")) {
-				System.out.println(printTemplate(id, getIncident(text), weaponsSet,
+				System.out.println(printTemplate(id, incident, weaponsSet,
 						new ArrayList<String>(Arrays.asList("-")), perpOrgs,
 						new ArrayList<String>(Arrays.asList("-")), new ArrayList<String>(Arrays.asList("-"))));
 				System.out.println();
@@ -612,7 +687,8 @@ public class infoextract {
 		for (String s : victim) {
 			template += " " + s;
 		}
-		template += "\n";
+		//template += "\n";
+		body += template + "\n" + "\n";
 		return template;
 	}
 
