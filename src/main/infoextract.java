@@ -72,7 +72,11 @@ public class infoextract {
 		scanner2.close();
 
 		instantiateRules();
+		//analyzeSentence("THE GUATEMALAN GOVERNMENT TODAY CONDEMNED THE MURDER OF SALVADORAN PRESIDENCY MINISTER ANTONIO RODRIGUEZ PORTH IN AN ATTACK PERPETRATED BY PRESUMED URBAN GUERRILLAS.");
+		//parseVictimRule("","THE GUATEMALAN GOVERNMENT TODAY CONDEMNED THE MURDER OF SALVADORAN PRESIDENCY MINISTER ANTONIO RODRIGUEZ PORTH AND DAVID SMITH IN AN ATTACK PERPETRATED BY PRESUMED URBAN GUERRILLAS.");
+		
 		generateTemplate();
+		
 
 		// PrintWriter printWriter = new PrintWriter(inputFile.getName() + ".template",
 		// "UTF-8");
@@ -88,6 +92,8 @@ public class infoextract {
 		// parsePerpOrgRule("", "");
 
 		// generateOutputFile();
+		
+		System.out.println("Done");
 	}
 
 	public static void parseInputFile(File file) throws FileNotFoundException, UnsupportedEncodingException {
@@ -188,21 +194,42 @@ public class infoextract {
 		victimRules.put("MURDER OF", "MURDER OF <VICTIM>");
 		victimRules.put("ASSASSINATION OF", "ASSASSINATION OF <VICTIM>");
 		victimRules.put("WERE KIDNAPPED", "<VICTIM> WERE KIDNAPPED");
+		victimRules.put("KIDNAPPED", "<VICTIM> KIDNAPPED");
 		victimRules.put("WAS KILLED", "<VICTIM> WAS KILLED");
+		victimRules.put("WAS SHOT", "<VICTIM> WAS SHOT");
 		victimRules.put("WERE KILLED", "<VICTIM> WERE KILLED");
 		victimRules.put("DIED", "<VICTIM> DIED");
-		victimRules.put("MURDER OF", "MURDER OF <VICTIM>");
+		victimRules.put("KIDNAPPING OF", "KIDNAPPING OF <VICTIM>");
+		victimRules.put("WAS ABDUCTED", "<VICTIM> WAS ABDUCTED");
+		victimRules.put("WAS MURDERED", "<VICTIM> WAS MURDERED");
+		victimRules.put("WERE MURDERED", "<VICTIM> WERE MURDERED");
+		victimRules.put("MURDERED", "MURDERED <VICTIM>");
+		victimRules.put("DISAPPEARED", "<VICTIM> DISAPPEARED");
+		victimRules.put("KILLED", "KILLED <VICTIM>");
+		victimRules.put("WERE RESCUED", "<VICTIM> WERE RESCUED");
+		victimRules.put("WAS RESCUED", "<VICTIM> WAS RESCUED");
+		victimRules.put("RESCUE OF", "RESCUE OF <VICTIM>");
+		victimRules.put("DEATH OF", "RESCUE OF <VICTIM>");
+		victimRules.put("TO RESCUE", "TO RESCUE <VICTIM>");
+		victimRules.put("VICTIMS IDENTIFIED", "VICTIMS IDENTIFIED <VICTIM>");
+		victimRules.put("VICTIM IDENTIFIED", "VICTIM IDENTIFIED <VICTIM>");
+		victimRules.put("WOUNDED INCLUDE", "WOUNDED INCLUDE <VICTIM>");
+		victimRules.put("WAS WOUNDED", "<VICTIM> WAS WOUNDED");
+		victimRules.put("WOUNDED", "<VICTIM> WOUNDED");
+		victimRules.put("SHOT BY", "<VICTIM> SHOT BY");
+		victimRules.put("ATTACKED BY", "<VICTIM> ATTACKED BY");
 	}
 
 	public static void analyzeSentence(String s) {
-		Sentence sent = new Sentence(s);
-
-		// System.out.println(s);
-		// System.out.println(sent.parse());
-		// for (int i = 0; i < sent.words().size(); i++) {
-		// System.out.println(sent.word(i) + " " + sent.posTag(i) + " " +
-		// sent.nerTag(i));
-		// }
+		Sentence sent1 = new Sentence(s);
+		Sentence sent = sent1.caseless();
+		System.out.println(s);
+		System.out.println(sent.caseless().parse());
+		for (int i = 0; i < sent.words().size(); i++) {
+			System.out.println(sent.word(i) + " " + sent.posTag(i) + " " + sent.nerTag(i));
+		}
+		
+		System.out.println("");
 	}
 
 	public static void metric() {
@@ -515,6 +542,88 @@ public class infoextract {
 
 		return weapon;
 	}
+	
+	public static String parseVictimRule(String rule, String s) {
+		// rule = "DESTROYED BY <WEAPON>";
+		// s = "BOGOTA WAS DESTROYED BY A BOMB, POLICE REPORTED.";
+		s = s.replaceAll("\\s*\\p{Punct}+\\s*$", "");
+		s = s.replaceAll("\"", "");
+		s = s.replaceAll(",", "");
+		s = s.replaceAll("\\[", "").replaceAll("\\]", "");
+		s = s.replaceAll("\\(", "").replaceAll("\\)", "");
+		s = s.replaceAll("\\{", "").replaceAll("\\}", "");
+		s = s.replaceAll("\\$", "").replaceAll("\\$", "");
+		s = s.replaceAll("--", "");
+		String[] rules = rule.split("\\s+");
+		String[] split = s.split("\\s+");
+		String victim = null;
+
+		boolean after = true;
+
+		Sentence sentence = new Sentence(s).caseless();
+		List<String> posSplit = sentence.caseless().posTags();
+		// System.out.println(sentence.caseless().parse());
+		int index = 0;
+		int indexOfTriggerWord = 0;
+		int indexOfVictim = 0;
+		
+		if(sentence.nerTags().contains("PERSON")) {
+			victim = "";
+			
+			for (int i = 0; i < sentence.words().size(); i++) {
+				if(sentence.nerTag(i).equals("PERSON")){
+					victim += sentence.word(i) + " ";
+				}
+			}
+			
+			return victim.trim();
+		}
+		
+		for (int i = 0; i < rules.length; i++) {
+			if (!rules[i].contains("<")) {
+				indexOfTriggerWord = i;
+			} else {
+				indexOfVictim = i;
+			}
+		}
+
+		if (indexOfTriggerWord > indexOfVictim) {
+			after = false;
+		} else if (indexOfTriggerWord < indexOfVictim) {
+			after = true;
+		}
+		String s1;
+		for (int i = 0; i < split.length; i++) {
+			s1 = split[i].replaceAll("\\s*\\p{Punct}+\\s*$", "");
+			if (s1.equals(rules[indexOfTriggerWord])) {
+				index = i;
+				break;
+			}
+		}
+
+		if (after) {
+			for (int i = index + 1; i < split.length; i++) {
+				if (posSplit.get(i).contains("NN")) {
+					if (weapons.contains(split[i])) {
+						victim = split[i];
+					}
+					break;
+				}
+			}
+		} else {
+			for (int i = index - 1; i > -1; i--) {
+				
+				if (posSplit.get(i).contains("NN")) {
+					if (weapons.contains(split[i])) {
+						victim = split[i];
+					}
+					break;
+				}
+			}
+		}
+
+		return victim;
+	}
 
 	public static HashSet<String> parseWeaponsSpecificRules(String text) {
 		HashSet<String> weaponsSet = new HashSet<String>();
@@ -556,30 +665,44 @@ public class infoextract {
 
 			HashSet<String> weaponsSet = parseWeaponsSpecificRules(text);
 			HashSet<String> perpOrgs = new HashSet<String>();
+			HashSet<String> victims = new HashSet<String>();
 
 			Document d = new Document(text);
-
+			//System.out.println(id);
 			for (Sentence s : d.sentences()) {
 				// System.out.println(s.text());
-				for (String s1 : weaponGeneralRules.keySet()) {
-					// System.out.println(s1);
-					if (s.text().matches(".*\\b" + s1 + "\\b.*")) {
-						String w = parseWeaponRule(weaponGeneralRules.get(s1), s.text());
+//				for (String s1 : weaponGeneralRules.keySet()) {
+//					// System.out.println(s1);
+//					if (s.text().matches(".*\\b" + s1 + "\\b.*")) {
+//						String w = parseWeaponRule(weaponGeneralRules.get(s1), s.text());
+//						if (w != null) {
+//							weaponsSet.add(w);
+//						}
+//					}
+//				}
+//
+//				for (String s1 : perpOrgRules.keySet()) {
+//					// System.out.println(s1);
+//					if (s.text().matches(".*\\b" + s1 + "\\b.*")) {
+//						String w = parsePerpOrgRule(perpOrgRules.get(s1), s.text());
+//						if (w != null) {
+//							perpOrgs.add(w);
+//						}
+//					}
+//				}
+//				
+//				
+				for(String s2 : victimRules.keySet()) {
+					if (s.text().matches(".*\\b" + s2 + "\\b.*")) {
+						String w = parseVictimRule(victimRules.get(s2), s.text());
+						//System.out.println(w);
 						if (w != null) {
-							weaponsSet.add(w);
+							victims.add(w);
 						}
 					}
 				}
-
-				for (String s1 : perpOrgRules.keySet()) {
-					// System.out.println(s1);
-					if (s.text().matches(".*\\b" + s1 + "\\b.*")) {
-						String w = parsePerpOrgRule(perpOrgRules.get(s1), s.text());
-						if (w != null) {
-							perpOrgs.add(w);
-						}
-					}
-				}
+				
+				
 			}
 			// System.out.print(id + " ");
 			// for(String s : perpOrgs) {
@@ -590,7 +713,7 @@ public class infoextract {
 			if (id.startsWith("DEV") || id.startsWith("TST")) {
 				System.out.println(
 						printTemplate(id, incident, weaponsSet, new ArrayList<String>(Arrays.asList("-")), perpOrgs,
-								new ArrayList<String>(Arrays.asList("-")), new ArrayList<String>(Arrays.asList("-"))));
+								new ArrayList<String>(Arrays.asList("-")), victims));
 				System.out.println();
 			}
 		}
@@ -623,7 +746,7 @@ public class infoextract {
 	}
 
 	public static String printTemplate(String id, String incident, HashSet<String> weapon, List<String> perpIndiv,
-			HashSet<String> perpOrg, List<String> target, List<String> victim) {
+			HashSet<String> perpOrg, List<String> target, HashSet<String> victim) {
 		String template = "";
 		template += "ID: " + id + "\n";
 		template += "INCIDENT: " + incident + "\n";
