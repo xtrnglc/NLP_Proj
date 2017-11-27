@@ -191,30 +191,31 @@ public class infoextract {
 		perpOrgRules.put("BLAMED", "BLAMED <PERPORG>");
 		perpOrgRules.put("KIDNAPPED", "<PERPORG> KIDNAPPED");
 
-		victimRules.put("MURDER OF", "MURDER OF <VICTIM>");
-		victimRules.put("ASSASSINATION OF", "ASSASSINATION OF <VICTIM>");
+		victimRules.put("MURDER OF", "MURDER <VICTIM>");
+		victimRules.put("ASSASSINATION OF", "ASSASSINATION <VICTIM>");
 		victimRules.put("WERE KIDNAPPED", "<VICTIM> WERE KIDNAPPED");
 		victimRules.put("KIDNAPPED", "<VICTIM> KIDNAPPED");
-		victimRules.put("WAS KILLED", "<VICTIM> WAS KILLED");
-		victimRules.put("WAS SHOT", "<VICTIM> WAS SHOT");
-		victimRules.put("WERE KILLED", "<VICTIM> WERE KILLED");
+		victimRules.put("WAS KILLED", "<VICTIM> KILLED");
+		victimRules.put("WAS SHOT", "<VICTIM> SHOT");
+		victimRules.put("WERE KILLED", "<VICTIM> KILLED");
 		victimRules.put("DIED", "<VICTIM> DIED");
-		victimRules.put("KIDNAPPING OF", "KIDNAPPING OF <VICTIM>");
-		victimRules.put("WAS ABDUCTED", "<VICTIM> WAS ABDUCTED");
-		victimRules.put("WAS MURDERED", "<VICTIM> WAS MURDERED");
-		victimRules.put("WERE MURDERED", "<VICTIM> WERE MURDERED");
+		victimRules.put("KIDNAPPING OF", "KIDNAPPING <VICTIM>");
+		victimRules.put("WAS ABDUCTED", "<VICTIM> ABDUCTED");
+		victimRules.put("WAS MURDERED", "<VICTIM> MURDERED");
+		victimRules.put("WERE MURDERED", "<VICTIM> MURDERED");
 		victimRules.put("MURDERED", "MURDERED <VICTIM>");
 		victimRules.put("DISAPPEARED", "<VICTIM> DISAPPEARED");
 		victimRules.put("KILLED", "KILLED <VICTIM>");
-		victimRules.put("WERE RESCUED", "<VICTIM> WERE RESCUED");
-		victimRules.put("WAS RESCUED", "<VICTIM> WAS RESCUED");
-		victimRules.put("RESCUE OF", "RESCUE OF <VICTIM>");
-		victimRules.put("DEATH OF", "RESCUE OF <VICTIM>");
+		victimRules.put("WERE RESCUED", "<VICTIM> RESCUED");
+		victimRules.put("WAS RESCUED", "<VICTIM> RESCUED");
+		victimRules.put("RESCUE OF", "RESCUE <VICTIM>");
+		victimRules.put("DEATH OF", "DEATH <VICTIM>");
+		victimRules.put("MASSACRE OF", "MASSACRE <VICTIM>");
 		victimRules.put("TO RESCUE", "TO RESCUE <VICTIM>");
 		victimRules.put("VICTIMS IDENTIFIED", "VICTIMS IDENTIFIED <VICTIM>");
 		victimRules.put("VICTIM IDENTIFIED", "VICTIM IDENTIFIED <VICTIM>");
-		victimRules.put("WOUNDED INCLUDE", "WOUNDED INCLUDE <VICTIM>");
-		victimRules.put("WAS WOUNDED", "<VICTIM> WAS WOUNDED");
+		victimRules.put("WOUNDED INCLUDE", "WOUNDED <VICTIM>");
+		victimRules.put("WAS WOUNDED", "<VICTIM> WOUNDED");
 		victimRules.put("WOUNDED", "<VICTIM> WOUNDED");
 		victimRules.put("SHOT BY", "<VICTIM> SHOT BY");
 		victimRules.put("ATTACKED BY", "<VICTIM> ATTACKED BY");
@@ -543,7 +544,7 @@ public class infoextract {
 		return weapon;
 	}
 	
-	public static String parseVictimRule(String rule, String s) {
+	public static HashSet<String> parseVictimRule(String rule, String s) {
 		// rule = "DESTROYED BY <WEAPON>";
 		// s = "BOGOTA WAS DESTROYED BY A BOMB, POLICE REPORTED.";
 		s = s.replaceAll("\\s*\\p{Punct}+\\s*$", "");
@@ -557,6 +558,7 @@ public class infoextract {
 		String[] rules = rule.split("\\s+");
 		String[] split = s.split("\\s+");
 		String victim = null;
+		HashSet<String> victims = new HashSet<String>();
 
 		boolean after = true;
 
@@ -568,15 +570,34 @@ public class infoextract {
 		int indexOfVictim = 0;
 		
 		if(sentence.nerTags().contains("PERSON")) {
-			victim = "";
-			
+			String victim1 = "";
+			int count = 0;
+			boolean person = false;
 			for (int i = 0; i < sentence.words().size(); i++) {
-				if(sentence.nerTag(i).equals("PERSON")){
-					victim += sentence.word(i) + " ";
+				if(sentence.nerTag(i).equals("PERSON") && !person){
+					count++;
+					person = true;
+				}
+				if(!sentence.nerTag(i).equals("PERSON")) {
+					person = false;
 				}
 			}
 			
-			return victim.trim();
+			for (int i = 0; i < sentence.words().size(); i++) {
+				if(sentence.nerTag(i).equals("PERSON")){
+					victim1 += sentence.word(i) + " ";
+					if(i == sentence.words().size() - 1) {
+						
+					} else {
+						if(!sentence.nerTag(i+1).equals("PERSON")) {
+							victims.add(victim1);
+							victim1 = "";
+						}
+					}
+				}
+			}
+			
+			
 		}
 		
 		for (int i = 0; i < rules.length; i++) {
@@ -604,9 +625,7 @@ public class infoextract {
 		if (after) {
 			for (int i = index + 1; i < split.length; i++) {
 				if (posSplit.get(i).contains("NN")) {
-					if (weapons.contains(split[i])) {
-						victim = split[i];
-					}
+					victim = split[i];
 					break;
 				}
 			}
@@ -614,15 +633,13 @@ public class infoextract {
 			for (int i = index - 1; i > -1; i--) {
 				
 				if (posSplit.get(i).contains("NN")) {
-					if (weapons.contains(split[i])) {
-						victim = split[i];
-					}
+					victim = split[i];
 					break;
 				}
 			}
 		}
-
-		return victim;
+		victims.add(victim);
+		return victims;
 	}
 
 	public static HashSet<String> parseWeaponsSpecificRules(String text) {
@@ -655,6 +672,16 @@ public class infoextract {
 					i++;
 				}
 			}
+			
+			text = text.replaceAll("\\s*\\p{Punct}+\\s*$", "");
+			text = text.replaceAll("\"", "");
+			text = text.replaceAll(",", "");
+			text = text.replaceAll("\\[", "").replaceAll("\\]", "");
+			text = text.replaceAll("\\(", "").replaceAll("\\)", "");
+			text = text.replaceAll("\\{", "").replaceAll("\\}", "");
+			text = text.replaceAll("\\$", "").replaceAll("\\$", "");
+			text = text.replaceAll("--", "");
+			
 			String incident = getIncident(text);
 			oursIncident.put(id, incident);
 
@@ -662,6 +689,10 @@ public class infoextract {
 			// HashSet<String> perpetrator_orgs = getAnswers(perp_orgs, text);
 
 			// DEV-MUC3-0126, DEV-MUC3-0231, DEV-MUC3-0253, DEV-MUC3-0277, DEV-MUC3-0316
+			
+			if(id.equals("DEV-MUC3-0022")) {
+				System.out.print("");
+			}
 
 			HashSet<String> weaponsSet = parseWeaponsSpecificRules(text);
 			HashSet<String> perpOrgs = new HashSet<String>();
@@ -694,10 +725,10 @@ public class infoextract {
 //				
 				for(String s2 : victimRules.keySet()) {
 					if (s.text().matches(".*\\b" + s2 + "\\b.*")) {
-						String w = parseVictimRule(victimRules.get(s2), s.text());
+						HashSet<String> w = parseVictimRule(victimRules.get(s2), s.text());
 						//System.out.println(w);
 						if (w != null) {
-							victims.add(w);
+							victims.addAll(w);
 						}
 					}
 				}
@@ -795,9 +826,23 @@ public class infoextract {
 			template += "\n";
 		}
 		template += "VICTIM: ";
-		for (String s : victim) {
-			template += " " + s;
+		int count3 = 0;
+		if (victim.size() == 0) {
+			template += "-";
+			template += "\n";
 		}
+		for (String s : victim) {
+			if (count3 == 0) {
+				template += s;
+				template += "\n";
+			} else {
+				template += "        " + s;
+				template += "\n";
+			}
+
+			count3++;
+		}
+		
 		// template += "\n";
 		body += template + "\n" + "\n";
 		return template;
