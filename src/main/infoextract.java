@@ -1,5 +1,5 @@
 package main;
-//wew
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -72,8 +72,8 @@ public class infoextract {
 		scanner2.close();
 
 		instantiateRules();
-		//analyzeSentence("THE GUATEMALAN GOVERNMENT TODAY CONDEMNED THE MURDER OF SALVADORAN PRESIDENCY MINISTER ANTONIO RODRIGUEZ PORTH IN AN ATTACK PERPETRATED BY PRESUMED URBAN GUERRILLAS.");
-		//parseVictimRule("","THE GUATEMALAN GOVERNMENT TODAY CONDEMNED THE MURDER OF SALVADORAN PRESIDENCY MINISTER ANTONIO RODRIGUEZ PORTH AND DAVID SMITH IN AN ATTACK PERPETRATED BY PRESUMED URBAN GUERRILLAS.");
+		//analyzeSentence("INTERVIEW WITH DEMOCRATIC CONVERGENCELEADER RUBEN ZAMORA BY ALESSANDRO OPPES -RSB- -LSB- EXCERPT -RSB- -LSB- PASSAGE OMITTED -RSB- -LSB- OPPES -RSB- THE FARABUNDO MARTI NATIONAL LIBERATION FRONT -LSB- FMLN -RSB- HASDESCRIBED THE ARREST OF FIVE SOLDIERS ACCUSED OF COMMITTING THE MASSACRE -LSB- OF SIX JESUIT PRIESTS -RSB- AS `` A MANIPULATED COVER OPERATION .");
+		//HashSet<String> v = parseVictimRule("MASSACRE <VICTIM>","[INTERVIEW WITH DEMOCRATIC CONVERGENCE LEADER RUBEN ZAMORA BY ALESSANDRO OPPES] [EXCERPT] [PASSAGE OMITTED] [OPPES] THE FARABUNDO MARTI NATIONAL LIBERATION FRONT [FMLN] HAS DESCRIBED THE ARREST OF FIVE SOLDIERS ACCUSED OF COMMITTING THE MASSACRE [OF SIX JESUIT PRIESTS] AS \"A MANIPULATED COVER OPERATION.\" BASICALLY, CRISTIANI IS ALLEGED TO HAVE DECIDED TO PUNISH A NUMBER OF LOW-RANKING OFFICERS TO CLOSE THE CASE AS QUICKLY AS POSSIBLE AND TO END INTERNATIONAL PRESSURES.");
 		
 		generateTemplate();
 		
@@ -223,7 +223,7 @@ public class infoextract {
 		victimRules.put("WOUNDED", "<VICTIM> WOUNDED");
 		victimRules.put("SHOT BY", "<VICTIM> SHOT BY");
 		victimRules.put("ATTACKED BY", "<VICTIM> ATTACKED BY");
-	}
+		}
 
 	public static void analyzeSentence(String s) {
 		Sentence sent1 = new Sentence(s);
@@ -561,7 +561,7 @@ public class infoextract {
 		s = s.replaceAll("--", "");
 		String[] rules = rule.split("\\s+");
 		String[] split = s.split("\\s+");
-		String victim = null;
+		String victim = "";
 		HashSet<String> victims = new HashSet<String>();
 
 		boolean after = true;
@@ -627,18 +627,49 @@ public class infoextract {
 		}
 
 		if (after) {
+//			for (int i = index + 1; i < split.length; i++) {
+//				if (posSplit.get(i).contains("NN")) {
+//					victim = split[i];
+//					break;
+//				}
+//			}
+			
+			String subStr = "";
 			for (int i = index + 1; i < split.length; i++) {
-				if (posSplit.get(i).contains("NN")) {
-					victim = split[i];
-					break;
+				subStr += split[i] + " ";
+			}
+			try{
+				Sentence subSentence = new Sentence(subStr);
+				boolean found = false;
+				// System.out.println(subSentence.parse());
+				for (Tree subtree : subSentence.caseless().parse()) {
+					if (subtree.label().value().equals("NP") && !found) {
+						for (Tree t : subtree.getLeaves()) {
+							victim += t.value() + " ";
+							found = true;
+						}
+					}
+					if (found) {
+						break;
+					}
 				}
 			}
+			catch(Exception e) {
+			}
+			
 		} else {
-			for (int i = index - 1; i > -1; i--) {
-				
-				if (posSplit.get(i).contains("NN")) {
-					victim = split[i];
-					break;
+			String subStr = "";
+			for (int i = 0; i < index; i++) {
+				subStr += split[i] + " ";
+			}
+			Sentence subSentence = new Sentence(subStr);
+			// System.out.println(subSentence.caseless().parse());
+			for (Tree subtree : subSentence.caseless().parse()) {
+				if (subtree.label().value().equals("NP")) {
+					victim = "";
+					for (Tree t : subtree.getLeaves()) {
+						victim += t.value() + " ";
+					}
 				}
 			}
 		}
