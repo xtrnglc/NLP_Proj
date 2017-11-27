@@ -207,12 +207,12 @@ public class infoextract {
 	public static void analyzeSentence(String s) {
 		Sentence sent1 = new Sentence(s);
 		Sentence sent = sent1.caseless();
-		System.out.println(s);
-		//System.out.println(sent.caseless().parse());
-		for (int i = 0; i < sent.words().size(); i++) {
-			System.out.println(i + " " + sent.word(i) + " " + sent.posTag(i) + " " + sent.nerTag(i));
-		}
-				
+//		System.out.println(s);
+//		//System.out.println(sent.caseless().parse());
+//		for (int i = 0; i < sent.words().size(); i++) {
+//			System.out.println(i + " " + sent.word(i) + " " + sent.posTag(i) + " " + sent.nerTag(i));
+//		}
+//				
 //		for (Tree subtree : sent.caseless().parse()) {
 //			if (subtree.label().value().equals("NP")) {
 //				for (Tree t : subtree.getLeaves()) {
@@ -396,28 +396,28 @@ public class infoextract {
 	public static String parsePerpOrgRule(String rule, String s) {
 		try {
 			// s = "FOR WHICH THE FMLN GUERRILLAS CLAIMED RESPONSIBILITY";
-			s = s.replaceAll("\\s*\\p{Punct}+\\s*$", "");
-			s = s.replaceAll("\"", "");
-			s = s.replaceAll(",", "");
-			s = s.replaceAll("\\[", "").replaceAll("\\]", "");
-			s = s.replaceAll("\\(", "").replaceAll("\\)", "");
-			s = s.replaceAll("\\{", "").replaceAll("\\}", "");
-			s = s.replaceAll("\\$", "").replaceAll("\\$", "");
-			s = s.replaceAll("--", "");
+//			s = s.replaceAll("\\s*\\p{Punct}+\\s*$", "");
+//			s = s.replaceAll("\"", "");
+//			s = s.replaceAll(",", "");
+//			s = s.replaceAll("\\[", "").replaceAll("\\]", "");
+//			s = s.replaceAll("\\(", "").replaceAll("\\)", "");
+//			s = s.replaceAll("\\{", "").replaceAll("\\}", "");
+//			s = s.replaceAll("\\$", "").replaceAll("\\$", "");
+//			s = s.replaceAll("--", "");
 			// rule = "<PERPORG> CLAIMED RESPONSIBILITY";
-			String[] split = s.split("\\s+");
 			String[] rules = rule.split("\\s+");
 
 			String perpOrgReturn = null;
 
 			Sentence sent = new Sentence(s).caseless();
+			String[] split = sent.caseless().words().stream().toArray(String[]::new);
 
 			// System.out.println(sent.parse());
 
 			// System.out.println(sent.nerTags());
-			for (int i = 0; i < split.length; i++) {
-				 System.out.println(sent.word(i) + " " + sent.posTag(i) + " " + sent.nerTag(i));
-			}
+//			for (int i = 0; i < sent.words().size(); i++) {
+//				 //System.out.println(sent.word(i) + " " + sent.posTag(i) + " " + sent.nerTag(i));
+//			}
 
 			int index = 0;
 			int indexOfTriggerWord = 0;
@@ -564,21 +564,23 @@ public class infoextract {
 	public static String parseWeaponRule(String rule, String s) {
 		// rule = "DESTROYED BY <WEAPON>";
 		// s = "BOGOTA WAS DESTROYED BY A BOMB, POLICE REPORTED.";
-		s = s.replaceAll("\\s*\\p{Punct}+\\s*$", "");
-		s = s.replaceAll("\"", "");
-		s = s.replaceAll(",", "");
-		s = s.replaceAll("\\[", "").replaceAll("\\]", "");
-		s = s.replaceAll("\\(", "").replaceAll("\\)", "");
-		s = s.replaceAll("\\{", "").replaceAll("\\}", "");
-		s = s.replaceAll("\\$", "").replaceAll("\\$", "");
-		s = s.replaceAll("--", "");
+//		s = s.replaceAll("\\s*\\p{Punct}+\\s*$", "");
+//		s = s.replaceAll("\"", "");
+//		s = s.replaceAll(",", "");
+//		s = s.replaceAll("\\[", "").replaceAll("\\]", "");
+//		s = s.replaceAll("\\(", "").replaceAll("\\)", "");
+//		s = s.replaceAll("\\{", "").replaceAll("\\}", "");
+//		s = s.replaceAll("\\$", "").replaceAll("\\$", "");
+//		s = s.replaceAll("--", "");
 		String[] rules = rule.split("\\s+");
-		String[] split = s.split("\\s+");
+		
+		
 		String weapon = null;
 
 		boolean after = true;
 
 		Sentence sentence = new Sentence(s).caseless();
+		String[] split = sentence.caseless().words().stream().toArray(String[]::new);
 		List<String> posSplit = sentence.caseless().posTags();
 		// System.out.println(sentence.caseless().parse());
 		int index = 0;
@@ -844,9 +846,9 @@ public class infoextract {
 
 			// DEV-MUC3-0126, DEV-MUC3-0231, DEV-MUC3-0253, DEV-MUC3-0277, DEV-MUC3-0316
 
-			if (id.equals("DEV-MUC3-0022")) {
-				System.out.print("");
-			}
+//			if (id.equals("DEV-MUC3-0022")) {
+//				System.out.print("");
+//			}
 
 			HashSet<String> weaponsSet = parseWeaponsSpecificRules(text);
 			HashSet<String> perpOrgs = new HashSet<String>();
@@ -857,31 +859,29 @@ public class infoextract {
 			// System.out.println(id);
 			for (Sentence s : d.sentences()) {
 //				// System.out.println(s.text());
-//				for (String s1 : weaponGeneralRules.keySet()) {
-//					// System.out.println(s1);
-//					if (s.text().matches(".*\\b" + s1 + "\\b.*")) {
-//						String w = parseWeaponRule(weaponGeneralRules.get(s1), s.text());
-//						if (w != null) {
-//							weaponsSet.add(w);
-//						}
-//					}
-//				}
-//
-//				for (String s1 : perpOrgRules.keySet()) {
-//					// System.out.println(s1);
-//					if (s.text().matches(".*\\b" + s1 + "\\b.*")) {
-//						String w = parsePerpOrgRule(perpOrgRules.get(s1), s.text());
-//						if (w != null) {
-//							perpOrgs.add(w);
-//						}
-//					}
-//				}
+				for (String s1 : weaponGeneralRules.keySet()) {
+					// System.out.println(s1);
+					if (s.text().matches(".*\\b" + s1 + "\\b.*")) {
+						String w = parseWeaponRule(weaponGeneralRules.get(s1), s.text());
+						if (w != null) {
+							weaponsSet.add(w);
+						}
+					}
+				}
+
+				for (String s1 : perpOrgRules.keySet()) {
+					// System.out.println(s1);
+					if (s.text().matches(".*\\b" + s1 + "\\b.*")) {
+						String w = parsePerpOrgRule(perpOrgRules.get(s1), s.text());
+						if (w != null) {
+							perpOrgs.add(w);
+						}
+					}
+				}
 
 				for (String s2 : victimRules.keySet()) {
 					if (s.text().matches(".*\\b" + s2 + "\\b.*")) {
-						if(s2.equals("MURDER OF")){
-							System.out.print("");
-						}
+
 						HashSet<String> w = parseVictimRule(victimRules.get(s2), s.text());
 						// System.out.println(w);
 						if (w != null) {
