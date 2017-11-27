@@ -190,11 +190,15 @@ public class infoextract {
 		perpOrgRules.put("STAGED", "<PERPORG> STAGED");
 		perpOrgRules.put("BLAMED", "BLAMED <PERPORG>");
 		perpOrgRules.put("KIDNAPPED", "<PERPORG> KIDNAPPED");
+		perpOrgRules.put("SET OFF", "<PERPORG> SET OFF");
+		perpOrgRules.put("WERE BEHIND", "<PERPORG> BEHIND");
+		perpOrgRules.put("CARRIED OUT", "<PERPORG> CARRIED OUT");
+		perpOrgRules.put("BOMBED", "<PERPORG> BOMBED");
+		perpOrgRules.put("LAUNCHED", "<PERPORG> LAUNCHED");
 
 		victimRules.put("MURDER OF", "MURDER <VICTIM>");
 		victimRules.put("ASSASSINATION OF", "ASSASSINATION <VICTIM>");
-		victimRules.put("WERE KIDNAPPED", "<VICTIM> WERE KIDNAPPED");
-		victimRules.put("KIDNAPPED", "<VICTIM> KIDNAPPED");
+		victimRules.put("WERE KIDNAPPED", "<VICTIM> KIDNAPPED");
 		victimRules.put("WAS KILLED", "<VICTIM> KILLED");
 		victimRules.put("WAS SHOT", "<VICTIM> SHOT");
 		victimRules.put("WERE KILLED", "<VICTIM> KILLED");
