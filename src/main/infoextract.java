@@ -158,6 +158,7 @@ public class infoextract {
 		weaponGeneralRules.put("WITH", "WITH <WEAPON>");
 		weaponGeneralRules.put("PLACED", "PLACED <WEAPON>");
 		weaponGeneralRules.put("USING", "USING <WEAPON>");
+		weaponGeneralRules.put("LOADED", "LOADED <WEAPON>");
 
 		// perpIndivRules.put(key, value);
 
@@ -706,14 +707,14 @@ public class infoextract {
 				}
 			}
 
-			text = text.replaceAll("\\s*\\p{Punct}+\\s*$", "");
-			text = text.replaceAll("\"", "");
-			text = text.replaceAll(",", "");
-			text = text.replaceAll("\\[", "").replaceAll("\\]", "");
-			text = text.replaceAll("\\(", "").replaceAll("\\)", "");
-			text = text.replaceAll("\\{", "").replaceAll("\\}", "");
-			text = text.replaceAll("\\$", "").replaceAll("\\$", "");
-			text = text.replaceAll("--", "");
+//			text = text.replaceAll("\\s*\\p{Punct}+\\s*$", "");
+//			text = text.replaceAll("\"", "");
+//			text = text.replaceAll(",", "");
+//			text = text.replaceAll("\\[", "").replaceAll("\\]", "");
+//			text = text.replaceAll("\\(", "").replaceAll("\\)", "");
+//			text = text.replaceAll("\\{", "").replaceAll("\\}", "");
+//			text = text.replaceAll("\\$", "").replaceAll("\\$", "");
+//			text = text.replaceAll("--", "");
 
 			String incident = getIncident(text);
 			oursIncident.put(id, incident);
