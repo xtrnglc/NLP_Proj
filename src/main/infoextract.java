@@ -91,7 +91,7 @@ public class infoextract {
 
 		// parsePerpOrgRule("", "");
 
-		// generateOutputFile();
+		generateOutputFile();
 		
 		System.out.println("Done");
 	}
@@ -604,76 +604,76 @@ public class infoextract {
 			
 		}
 		
-		for (int i = 0; i < rules.length; i++) {
-			if (!rules[i].contains("<")) {
-				indexOfTriggerWord = i;
-			} else {
-				indexOfVictim = i;
-			}
-		}
-
-		if (indexOfTriggerWord > indexOfVictim) {
-			after = false;
-		} else if (indexOfTriggerWord < indexOfVictim) {
-			after = true;
-		}
-		String s1;
-		for (int i = 0; i < split.length; i++) {
-			s1 = split[i].replaceAll("\\s*\\p{Punct}+\\s*$", "");
-			if (s1.equals(rules[indexOfTriggerWord])) {
-				index = i;
-				break;
-			}
-		}
-
-		if (after) {
+//		for (int i = 0; i < rules.length; i++) {
+//			if (!rules[i].contains("<")) {
+//				indexOfTriggerWord = i;
+//			} else {
+//				indexOfVictim = i;
+//			}
+//		}
+//
+//		if (indexOfTriggerWord > indexOfVictim) {
+//			after = false;
+//		} else if (indexOfTriggerWord < indexOfVictim) {
+//			after = true;
+//		}
+//		String s1;
+//		for (int i = 0; i < split.length; i++) {
+//			s1 = split[i].replaceAll("\\s*\\p{Punct}+\\s*$", "");
+//			if (s1.equals(rules[indexOfTriggerWord])) {
+//				index = i;
+//				break;
+//			}
+//		}
+//
+//		if (after) {
+////			for (int i = index + 1; i < split.length; i++) {
+////				if (posSplit.get(i).contains("NN")) {
+////					victim = split[i];
+////					break;
+////				}
+////			}
+//			
+//			String subStr = "";
 //			for (int i = index + 1; i < split.length; i++) {
-//				if (posSplit.get(i).contains("NN")) {
-//					victim = split[i];
-//					break;
+//				subStr += split[i] + " ";
+//			}
+//			try{
+//				Sentence subSentence = new Sentence(subStr);
+//				boolean found = false;
+//				// System.out.println(subSentence.parse());
+//				for (Tree subtree : subSentence.caseless().parse()) {
+//					if (subtree.label().value().equals("NP") && !found) {
+//						for (Tree t : subtree.getLeaves()) {
+//							victim += t.value() + " ";
+//							found = true;
+//						}
+//					}
+//					if (found) {
+//						break;
+//					}
 //				}
 //			}
-			
-			String subStr = "";
-			for (int i = index + 1; i < split.length; i++) {
-				subStr += split[i] + " ";
-			}
-			try{
-				Sentence subSentence = new Sentence(subStr);
-				boolean found = false;
-				// System.out.println(subSentence.parse());
-				for (Tree subtree : subSentence.caseless().parse()) {
-					if (subtree.label().value().equals("NP") && !found) {
-						for (Tree t : subtree.getLeaves()) {
-							victim += t.value() + " ";
-							found = true;
-						}
-					}
-					if (found) {
-						break;
-					}
-				}
-			}
-			catch(Exception e) {
-			}
-			
-		} else {
-			String subStr = "";
-			for (int i = 0; i < index; i++) {
-				subStr += split[i] + " ";
-			}
-			Sentence subSentence = new Sentence(subStr);
-			// System.out.println(subSentence.caseless().parse());
-			for (Tree subtree : subSentence.caseless().parse()) {
-				if (subtree.label().value().equals("NP")) {
-					victim = "";
-					for (Tree t : subtree.getLeaves()) {
-						victim += t.value() + " ";
-					}
-				}
-			}
-		}
-		victims.add(victim);
+//			catch(Exception e) {
+//			}
+//			
+//		} else {
+//			String subStr = "";
+//			for (int i = 0; i < index; i++) {
+//				subStr += split[i] + " ";
+//			}
+//			Sentence subSentence = new Sentence(subStr);
+//			// System.out.println(subSentence.caseless().parse());
+//			for (Tree subtree : subSentence.caseless().parse()) {
+//				if (subtree.label().value().equals("NP")) {
+//					victim = "";
+//					for (Tree t : subtree.getLeaves()) {
+//						victim += t.value() + " ";
+//					}
+//				}
+//			}
+//		}
+//		victims.add(victim);
 		return victims;
 	}
 
@@ -780,7 +780,6 @@ public class infoextract {
 				System.out.println(
 						printTemplate(id, incident, weaponsSet, new ArrayList<String>(Arrays.asList("-")), perpOrgs,
 								new ArrayList<String>(Arrays.asList("-")), victims));
-				System.out.println();
 			}
 		}
 	}
@@ -879,7 +878,7 @@ public class infoextract {
 		}
 		
 		// template += "\n";
-		body += template + "\n" + "\n";
+		body += template;
 		return template;
 	}
 
