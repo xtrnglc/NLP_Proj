@@ -67,6 +67,8 @@ public class infoextract {
 		generateTemplate();
 
 		generateOutputFile();
+		
+		System.out.println("DONE");
 	}
 
 	public static void parseInputFile(File file) throws FileNotFoundException, UnsupportedEncodingException {
@@ -201,8 +203,8 @@ public class infoextract {
 		victimRules.put("DEATH OF", "DEATH <VICTIM>");
 		victimRules.put("MASSACRE OF", "MASSACRE <VICTIM>");
 		victimRules.put("TO RESCUE", "TO RESCUE <VICTIM>");
-		victimRules.put("VICTIMS IDENTIFIED", "VICTIMS IDENTIFIED <VICTIM>");
-		victimRules.put("VICTIM IDENTIFIED", "VICTIM IDENTIFIED <VICTIM>");
+		victimRules.put("VICTIMS WERE IDENTIFIED", "VICTIMS IDENTIFIED <VICTIM>");
+		victimRules.put("VICTIM WAS IDENTIFIED", "VICTIM IDENTIFIED <VICTIM>");
 		victimRules.put("WOUNDED INCLUDE", "WOUNDED <VICTIM>");
 		victimRules.put("WAS WOUNDED", "<VICTIM> WOUNDED");
 		victimRules.put("WOUNDED", "<VICTIM> WOUNDED");
@@ -429,20 +431,27 @@ public class infoextract {
 	}
 
 	public static String removeStopWords(String s) {
-		String[] split = s.split("\\s+");
-		String newString = "";
-		int index = -1;
-		String org = "";
+		try {
+			String[] split = s.split("\\s+");
+			String newString = "";
+			int index = -1;
+			String org = "";
 
-		ArrayList<String> stopWords = new ArrayList<String>(Arrays.asList("THE", "A", "SO-CALLED"));
+			ArrayList<String> stopWords = new ArrayList<String>(Arrays.asList("THE", "A", "SO-CALLED", "-RSB-", "-LSB-"));
 
-		for (String s1 : split) {
-			if (!stopWords.contains(s1)) {
-				newString += s1 + " ";
+			for (String s1 : split) {
+				if (!stopWords.contains(s1)) {
+					newString += s1 + " ";
+				}
 			}
+			return newString.trim();
 		}
+		catch(Exception e){
+			System.out.print("");
+		}
+		return null;
 
-		return newString.trim();
+		
 	}
 
 	public static String parseWeaponRule(String rule, String s) {
@@ -458,7 +467,7 @@ public class infoextract {
 		// s = s.replaceAll("--", "");
 		String[] rules = rule.split("\\s+");
 
-		String weapon = null;
+		String weapon = "";
 
 		boolean after = true;
 
@@ -493,41 +502,86 @@ public class infoextract {
 		}
 
 		if (after) {
+//			for (int i = index + 1; i < split.length; i++) {
+//				if (rules[indexOfTriggerWord].equals("BLASTS") || rules[indexOfTriggerWord].equals("BLAST")) {
+//					if (posSplit.get(i).contains("NN") || posSplit.get(i).equals("JJ")) {
+//						if (weapons.contains(split[i])) {
+//							weapon = split[i];
+//						}
+//						return weapon;
+//					}
+//				} else {
+//					if (posSplit.get(i).contains("NN")) {
+//						if (weapons.contains(split[i])) {
+//							weapon = split[i];
+//						}
+//						return weapon;
+//					}
+//				}
+//
+//			}
+			
+			String subStr = "";
 			for (int i = index + 1; i < split.length; i++) {
-				if (rules[indexOfTriggerWord].equals("BLASTS") || rules[indexOfTriggerWord].equals("BLAST")) {
-					if (posSplit.get(i).contains("NN") || posSplit.get(i).equals("JJ")) {
-						if (weapons.contains(split[i])) {
-							weapon = split[i];
-						}
-						break;
-					}
-				} else {
-					if (posSplit.get(i).contains("NN")) {
-						if (weapons.contains(split[i])) {
-							weapon = split[i];
-						}
-						break;
+				subStr += split[i] + " ";
+			}
+
+			Sentence subSentence = new Sentence(subStr);
+			boolean found = false;
+			// System.out.println(subSentence.parse());
+			
+			for (Tree subtree : subSentence.caseless().parse()) {
+				if (subtree.label().value().equals("NP") && !found) {
+					for (Tree t : subtree.getLeaves()) {
+						weapon += t.value() + " ";
+						found = true;
 					}
 				}
-
+				if (found) {
+					weapon = removeStopWords(weapon);
+					if (weapons.contains(weapon)) {
+						return weapon;
+					} else {
+						found = false;
+						weapon = "";
+					}
+				}
 			}
 		} else {
-			for (int i = index - 1; i > -1; i--) {
-				if (rules[indexOfTriggerWord].equals("BLASTS") || rules[indexOfTriggerWord].equals("BLAST")) {
-					if (posSplit.get(i).contains("NN") || posSplit.get(i).contains("JJ")) {
-						if (weapons.contains(split[i])) {
-							weapon = split[i];
-						}
-						break;
-					}
-				} else {
-					if (posSplit.get(i).contains("NN")) {
-						if (weapons.contains(split[i])) {
-							weapon = split[i];
-						}
-						break;
+//			for (int i = index - 1; i > -1; i--) {
+//				if (rules[indexOfTriggerWord].equals("BLASTS") || rules[indexOfTriggerWord].equals("BLAST")) {
+//					if (posSplit.get(i).contains("NN") || posSplit.get(i).contains("JJ")) {
+//						if (weapons.contains(split[i])) {
+//							weapon = split[i];
+//						}
+//						return weapon;
+//					}
+//				} else {
+//					if (posSplit.get(i).contains("NN")) {
+//						if (weapons.contains(split[i])) {
+//							weapon = split[i];
+//						}
+//						return weapon;
+//					}
+//				}
+//			}
+			String subStr = "";
+			for (int i = 0; i < index; i++) {
+				subStr += split[i] + " ";
+			}
+			Sentence subSentence = new Sentence(subStr);
+			// System.out.println(subSentence.caseless().parse());
+			for (Tree subtree : subSentence.caseless().parse()) {
+				if (subtree.label().value().equals("NP")) {
+					weapon = "";
+					for (Tree t : subtree.getLeaves()) {
+						weapon += t.value() + " ";
 					}
 				}
+			}
+			weapon = removeStopWords(weapon);
+			if (weapons.contains(weapon)) {
+				return weapon;
 			}
 		}
 
@@ -662,9 +716,10 @@ public class infoextract {
 		for (String s : victims) {
 			if (s.length() > 0) {
 				Sentence s1 = new Sentence(s).caseless();
-				for (String s2 : s1.nerTags()) {
+				List<String> pt = s1.posTags();
+				for (String s2 : s1.posTags()) {
 					if (!s2.contains("NN")) {
-						victimsCopy.remove(s1);
+						victimsCopy.remove(s);
 					}
 				}
 			} else {
@@ -724,7 +779,7 @@ public class infoextract {
 
 			// DEV-MUC3-0126, DEV-MUC3-0231, DEV-MUC3-0253, DEV-MUC3-0277, DEV-MUC3-0316
 
-			if (id.equals("DEV-MUC3-0022")) {
+			if (id.equals("DEV-MUC3-0102")) {
 				System.out.print("");
 			}
 
@@ -741,7 +796,9 @@ public class infoextract {
 					if (s.text().matches(".*\\b" + s1 + "\\b.*")) {
 						String w = parseWeaponRule(weaponGeneralRules.get(s1), s.text());
 						if (w != null) {
-							weaponsSet.add(w);
+							if(weapons.contains(w)) {
+								weaponsSet.add(w);
+							}
 						}
 					}
 				}
